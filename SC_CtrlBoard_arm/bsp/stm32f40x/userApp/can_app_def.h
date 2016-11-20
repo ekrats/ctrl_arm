@@ -3,7 +3,7 @@
 #define __CAN_APP_DEF__H__
 
 #include "stm32f4xx.h"
-#include "MB_DataStruct.h"
+#include "DataStruct.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,31 +57,6 @@ typedef struct _Can_Tx_Ram_
 	CanTxMsg     data;
 
 }CAN_TX_DATA_RAM, *PCAN_TX_DATA_RAM;
-
-
-enum{
-	Module1_Charge = 10,
-	Module2_Charge,
-	Module3_Charge,
-	Module4_Charge,
-	Reboot,
-	Module1_Set_Par,
-	Module2_Set_Par,
-	Module3_Set_Par,
-	Module4_Set_Par,
-	Module1_Read_Par,
-	Module2_Read_Par,
-	Module3_Read_Par,
-	Module4_Read_Par,
-	Module1_Set_Adj,
-	Module2_Set_Adj,
-	Module3_Set_Adj,
-	Module4_Set_Adj,
-	Module1_Read_Adj,
-	Module2_Read_Adj,
-	Module3_Read_Adj,
-	Module4_Read_Adj,
-};
 
 //------------function--------------------
 enum{
@@ -159,34 +134,6 @@ typedef struct _std_msg_config
 	uint8_t  *AppBuffData;
 	void (*callback)(CAN_RX_DATA_RAM*, EXTID_UTYP*, uint8_t);
 }STD_MSG_CON_TB;
-
-typedef struct
-{
-	Charge_Cmd_STYP dcdcCmd;
-	CAN_CB_Status_STYP	cbStatus;
-	CB_Para_STYP	cbPara;
-	CB_Para_STYP	cbWrPara;
-	CB_Adjust_STYP	cbAdj;
-	CB_Adjust_STYP	cbWrAdj;
-	uint8_t iap_info[16];
-	uint8_t iap_file[256];
-	uint8_t iap_check[8];
-	uint8_t iap_reply[8];
-	uint8_t	reBoot[8];
-	uint8_t null[8];
-}CanBuf_config;
-
-typedef struct
-{
-	Charge_Cmd_STYP dcdcCmd;
-	uint8_t iap_info[16];
-	uint8_t iap_file[256];
-	uint8_t iap_check[8];
-	uint8_t	iap_reply[8];
-	uint8_t	reBoot[8];
-	uint8_t null[8];
-	uint16_t iap_index;
-}canAppBuf_config;
 
 #ifdef __cplusplus
 }

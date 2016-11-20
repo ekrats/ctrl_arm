@@ -13,12 +13,12 @@ public:
 	~ScManager(){}
 
 	ScData shareData;
+	fpga_data fpga;
 		
 	void Init(void);
 	void Run(void);
 	void RelayRun(void);
 	void RefreshAdData(void);
-	void RefreshPt100Data(void);
 	void MonitorStatusUpdata(void);
 	void FaultDeal(void);
 	
@@ -28,8 +28,8 @@ public:
 	void FaultCheckModuleInit(void);
 		
 private:
-	List<ScFailure *> warnList;
-	List<ScFailure *> faultList;
+	List<ScFailure *> slowList;
+	List<ScFailure *> fastList;
 
 	CanApp *pCan;
 
@@ -38,11 +38,11 @@ private:
 	
 	void WarnRelayRun(void);
 	void FaultRelayRun(void);
-	void RefreshWarnList(void);
-	void RefreshFaultList(void);
-	void UpdateFaultState(void);
-	void UpdateWarnState(void);
+	void RefreshSlowList(void);
+	void RefreshFastList(void);
+	void UpdateFastState(void);
+	void UpdateSlowState(void);
     
-	bool warnListLock;
-	bool faultListLock;
+	bool slowListLock;
+	bool fastListLock;
 };

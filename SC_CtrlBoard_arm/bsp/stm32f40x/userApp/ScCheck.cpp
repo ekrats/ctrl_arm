@@ -1,144 +1,70 @@
 #include "ScManager.h"
 #include "DataStruct.h"
 
-static ScFailure canLostWarn(2000,200,1000);
-static ScFailure m1TempFailWarn(2000,200,6000);
-static ScFailure m2TempFailWarn(2000,200,6000);
-static ScFailure cap1TempFailWarn(2000,200,6000);
+static ScFailure canLost(2000,200,1000);
+static ScFailure iBatMinSlow(2000,200,1000);
+static ScFailure iBatMaxSlow(2000,200,1000);
+static ScFailure uBatMinSlow(2000,200,1000);
 
-static ScFailure cap2TempFailWarn(2000,200,6000);
-static ScFailure mainCon1FbWarn(2000,1000,6000);
-static ScFailure mainCon2FbWarn(2000,1000,6000);
-static ScFailure preConFbWarn(2000,1000,6000);
+static ScFailure uBatMaxSlow(2000,200,1000);
+static ScFailure uInMaxSlow(2000,200,1000);
+static ScFailure uInMinSlow(2000,200,1000);
+static ScFailure igbt1TempOver(2000,200,1000);
 
-static ScFailure outCon1FbWarn(2000,1000,6000);
-static ScFailure outCon2FbWarn(2000,1000,6000);
-static ScFailure outCon3FbWarn(2000,1000,6000);
-static ScFailure ac1VoltFailWarn(2000,600000,6000);
+static ScFailure igbt2TempOver(2000,200,1000);
 
-static ScFailure busVoltFailWarn(2000,200,6000);
-static ScFailure m1CurrFailWarn(2000,200,6000);
-static ScFailure m2CurrFailWarn(2000,200,6000);
-static ScFailure ac1VoltUnderWarn(2000,200,6000);
-
-static ScFailure dcdc1OnFailWarn(2000,3000,6000);
-static ScFailure dcdc2OnFailWarn(2000,3000,6000);
-static ScFailure dcdc3OnFailWarn(2000,3000,6000);
-static ScFailure dcdc4OnFailWarn(2000,3000,6000);
-
-static ScFailure inFuse1FailFault(0,1000,1000);
-static ScFailure inFuse2FailFault(0,1000,1000);
-static ScFailure ac1VoltOverFault(180000,500,1000);
-static ScFailure busOverFault(180000,500,1000);
-
-static ScFailure busUnderFault(180000,500,1000);
-static ScFailure m1TempOverFault(180000,1000,1000);
-static ScFailure m2TempOverFault(180000,1000,1000);
-static ScFailure cap1TempOverFault(180000,1000,1000);
-
-static ScFailure cap2TempOverFault(180000,1000,1000);
-static ScFailure m1CurrFailFault(180000,1000,1000);
-static ScFailure m2CurrFailFault(180000,1000,1000);
-static ScFailure m1CurrOverFault(180000,200,1000);
-
-static ScFailure m2CurrOverFault(180000,200,1000);
-
-static ScFailure dc1CurrOverFault(180000,200,1000);
-static ScFailure dc1VoltOverFault(180000,500,1000);
-static ScFailure dc1VoltFailFault(180000,2000,1000);
-static ScFailure out1FuseFailFault(0,500,1000);
-
-static ScFailure dc1OffFailFault(180000,2000,1000);
-static ScFailure dc1FailFault(180000,200,1000);
-static ScFailure out2FuseFailFault(0,500,1000);
-static ScFailure dc2OffFailFault(180000,2000,1000);
-
-static ScFailure dc2FailFault(180000,200,1000);
-static ScFailure dc2CurrOverFault(180000,200,1000);
-static ScFailure dc2VoltOverFault(180000,200,1000);
-static ScFailure dc2VoltFailFault(180000,200,1000);
-
-static ScFailure dc3VoltOverFault(180000,200,1000);
-static ScFailure dc3VoltFailFault(180000,200,1000);
-static ScFailure out3FuseFailFault(0,500,1000);
-static ScFailure dc3OffFailFault(180000,2000,1000);
-
-static ScFailure dc3FailFault(180000,200,1000);
-static ScFailure out4FuseFailFault(0,500,1000);
-static ScFailure dc4OffFailFault(180000,2000,1000);
-static ScFailure dc4FailFault(180000,200,1000);
+static ScFailure iBatMaxHW(2000,200,1000);
+static ScFailure uBatMaxHW(2000,200,1000);
+static ScFailure iBatMinFast(2000,200,1000);
+static ScFailure iBatMaxFast(2000,200,1000);
+static ScFailure uBatMinFast(2000,200,1000);
+static ScFailure uBatMaxFast(2000,200,1000);
+static ScFailure uInMaxFast(2000,200,1000);
+static ScFailure uInMinFast(2000,200,1000);
+static ScFailure shortCurr(2000,200,1000);
+static ScFailure uCfly(2000,200,1000);
 
 void ScManager::FaultCheckModuleInit(void)
 {
-	warnList.Add(&canLostWarn);
-	warnList.Add(&m1TempFailWarn);
-	warnList.Add(&m2TempFailWarn);
-	warnList.Add(&cap1TempFailWarn);
+	slowList.Add(&canLost);
+	slowList.Add(&iBatMinSlow);
+	slowList.Add(&iBatMaxSlow);
+	slowList.Add(&uBatMinSlow);
 	
-	warnList.Add(&cap2TempFailWarn);
-	warnList.Add(&mainCon1FbWarn);
-	warnList.Add(&mainCon2FbWarn);
-	warnList.Add(&preConFbWarn);
+	slowList.Add(&uBatMaxSlow);
+	slowList.Add(&uInMaxSlow);
+	slowList.Add(&uInMinSlow);
+	slowList.Add(&igbt1TempOver);
+	slowList.Add(&igbt2TempOver);
 	
-	warnList.Add(&outCon1FbWarn);
-	warnList.Add(&outCon2FbWarn);
-	warnList.Add(&outCon3FbWarn);
-	warnList.Add(&ac1VoltFailWarn);
-	
-	warnList.Add(&busVoltFailWarn);
-	warnList.Add(&m1CurrFailWarn);
-	warnList.Add(&m2CurrFailWarn);
-	warnList.Add(&ac1VoltUnderWarn);
-	
-	warnList.Add(&dcdc1OnFailWarn);
-	warnList.Add(&dcdc2OnFailWarn);
-	warnList.Add(&dcdc3OnFailWarn);
-	warnList.Add(&dcdc4OnFailWarn);
-	
-	faultList.Add(&inFuse1FailFault);
-	faultList.Add(&inFuse2FailFault);
-	faultList.Add(&ac1VoltOverFault);
-	faultList.Add(&busOverFault);
-
-	faultList.Add(&busUnderFault);
-	faultList.Add(&m1TempOverFault);
-	faultList.Add(&m2TempOverFault);
-	faultList.Add(&cap1TempOverFault);
-
-	faultList.Add(&cap2TempOverFault);
-	faultList.Add(&m1CurrFailFault);
-	faultList.Add(&m2CurrFailFault);
-	faultList.Add(&m1CurrOverFault);
-
-	faultList.Add(&m2CurrOverFault);
 }
 
-void ScManager::RefreshFaultList(void)
+void ScManager::RefreshFastList(void)
 {
-    if(!faultListLock)
+    if(!fastListLock)
     {
-        faultListLock = true;
-        faultList.Begin();
+        fastListLock = true;
+        fastList.Begin();
         ScFailure * tmp = NULL;
 
-        while ((tmp = faultList.Next()) != NULL)
+        while ((tmp = fastList.Next()) != NULL)
         {
             tmp->UpdateScFailureState();
         }
-        faultListLock = false;
+        fastListLock = false;
     }
 }
 
-void ScManager::UpdateFaultState(void)
+void ScManager::UpdateFastState(void)
 {
-    if(!faultListLock)
+    if(!fastListLock)
     {
-        faultListLock = true;
-        faultList.Begin();
+        fastListLock = true;
+        fastList.Begin();
         Failure * tmp = NULL;
         int i = 0;
 
-        while ((tmp = faultList.Next()) != NULL)
+        while ((tmp = fastList.Next()) != NULL)
         {
             if(tmp->IsOccurred())
             {
@@ -154,36 +80,36 @@ void ScManager::UpdateFaultState(void)
             }
             ++i;
         }
-        faultListLock = false;
+        fastListLock = false;
     }
 }
 
-void ScManager::RefreshWarnList(void)
+void ScManager::RefreshSlowList(void)
 {
-	if(!warnListLock)
+	if(!slowListLock)
     {
-        warnListLock = true;
-        warnList.Begin();
+        slowListLock = true;
+        slowList.Begin();
         ScFailure * tmp = NULL;
 
-        while ((tmp = warnList.Next()) != NULL)
+        while ((tmp = slowList.Next()) != NULL)
         {
             tmp->UpdateScFailureState();
         }
-        warnListLock = false;
+        slowListLock = false;
     }
 }
 
-void ScManager::UpdateWarnState(void)
+void ScManager::UpdateSlowState(void)
 {
-    if(!warnListLock)
+    if(!slowListLock)
     {
-        warnListLock = true;
-        warnList.Begin();
+        slowListLock = true;
+        slowList.Begin();
         Failure * tmp = NULL;
         int i = 0;
 
-        while ((tmp = warnList.Next()) != NULL)
+        while ((tmp = slowList.Next()) != NULL)
         {
             if(tmp->IsOccurred())
             {
@@ -199,7 +125,7 @@ void ScManager::UpdateWarnState(void)
             }
             ++i;
         }
-        warnListLock = false;
+        slowListLock = false;
     }
 }
 
@@ -226,29 +152,6 @@ void ScManager::RefreshAdData(void)
 		sensorListLock = false;
 	}
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void ScManager::RefreshPt100Data(void)
-{
-	if (!pt100ListLock)
-	{
-		pt100ListLock = true;
-		pt100List.Begin();
-		PT100 * tmp = NULL;
-		while ((tmp = pt100List.Next()) != NULL)
-		{
-			tmp->Update();
-		}
-		pt100ListLock = false;
-	}
-}
 
 
 /*******************************************************************************
@@ -262,16 +165,16 @@ void ScManager::RefreshPt100Data(void)
 *******************************************************************************/
 void ScManager::FaultRelayRun(void)
 {
-	if(!faultListLock)
+	if(!fastListLock)
     {
-        faultListLock = true;
-		faultList.Begin();
+        fastListLock = true;
+		fastList.Begin();
 		ScFailure * tmp = NULL;
-		while ((tmp = faultList.Next()) != NULL)
+		while ((tmp = fastList.Next()) != NULL)
 		{
 			tmp->RefreshRelays();
 		}
-		faultListLock = false;
+		fastListLock = false;
 	}
 }
 
@@ -286,16 +189,16 @@ void ScManager::FaultRelayRun(void)
 *******************************************************************************/
 void ScManager::WarnRelayRun(void)
 {
-	if(!warnListLock)
+	if(!slowListLock)
     {
-        warnListLock = true;
-		warnList.Begin();
+        slowListLock = true;
+		slowList.Begin();
 		ScFailure * tmp = NULL;
-		while ((tmp = warnList.Next()) != NULL)
+		while ((tmp = slowList.Next()) != NULL)
 		{
 			tmp->RefreshRelays();
 		}
-		warnListLock = false;
+		slowListLock = false;
 	}
 }
 
@@ -319,11 +222,9 @@ void ScManager::SlowCheck(void)
 {
 	MonitorCheckSlow();
 	
-	RefreshWarnList();
-	RefreshFaultList();
-	
-	UpdateFaultState();
-	UpdateWarnState();
+	RefreshSlowList();
+
+	UpdateSlowState();
 }
 
 void ScManager::MonitorCheckSlow(void)

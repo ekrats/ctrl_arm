@@ -5,7 +5,7 @@ class ScFailure : public Failure
 {
 public:
 	ScFailure(int lockTime, int conTime, int disTime):lockRelay(lockTime), 
-		conRelay(conTime) , disRelay(disTime)
+		conRelay(conTime, 1) , disRelay(disTime)
 	{
 		Failure::SetLimitedTimes(lockTime);
 	}
@@ -22,9 +22,13 @@ public:
 
 	void UpdateScFailureState();
 	
-	void RefreshRelays()
+	void RefreshConRelay()
 	{
 		conRelay.Refresh();
+	}
+	
+	void RefreshRelays()
+	{
 		disRelay.Refresh();
 		lockRelay.Refresh();
 	}

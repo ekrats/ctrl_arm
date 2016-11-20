@@ -50,18 +50,14 @@ void ad_init(void)
 {
 	buffer = get_ad_data_buffer();
 	
-//	sc.input1Current.Init(&buffer[i_in1_index], 7500, 80);//2500/(10*0.5*2)*3/2*10
-//	sc.input2Current.Init(&buffer[i_in2_index], 7500, 80);
-//	sc.outCurrent.Init(&buffer[i_out_index], 6250, 80);//5000/(10*0.6*2)*10*3/2
-//	sc.inputAc1Voltage.Init(&buffer[u_ac1_index], 13533, 20);//80000/(59.1*0.75*2) * 3/2 *10
-//	sc.inputBusVoltage.Init(&buffer[u_bus_index], 13533, 80);
-//	sc.output1Voltage.Init(&buffer[u_out1_index], 13533, 80);
-//	sc.output2Voltage.Init(&buffer[u_out2_index], 13533, 80);
-//	sc.output3Voltage.Init(&buffer[u_out3_index], 13533, 80);
-//	sc.module1Temp.Init(&buffer[temp_module1_index], 0, 5);
-//	sc.module2Temp.Init(&buffer[temp_module2_index], 0, 5);
-//	sc.cap1Temp.Init(&buffer[temp_cap1_index], 0, 5);
-//	sc.cap2Temp.Init(&buffer[temp_cap2_index], 0, 5);
+	sc.inVolt.Init(&buffer[u_in_index], 13533, 95);
+	sc.cFlyVolt.Init(&buffer[u_cfly_index], 13533, 80);
+	sc.outVolt.Init(&buffer[u_out_index], 13533, 95);
+	sc.batCurr.Init(&buffer[i_out_index], 4500, 95);
+	sc.iOutPeak.Init(&buffer[i_out_peak_index], 4500, 95);
+	sc.igbt1Temp.Init(&buffer[temp1_index], 0, 5);
+	sc.igbt2Temp.Init(&buffer[temp2_index], 0, 5);
+
 }
 
 /*******************************************************************************
@@ -151,10 +147,11 @@ void ScManager::FaultDeal(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void data_refresh(void)
+void task_entry(void)
 {
 	sc.RefreshAdData();
-	sc.RefreshPt100Data();
+	
+	
 }
 
 /*******************************************************************************

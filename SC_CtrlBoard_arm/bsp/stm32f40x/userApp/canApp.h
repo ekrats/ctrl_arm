@@ -3,7 +3,7 @@
 
 #include "stm32f4xx.h"
 #include <rtthread.h>
-#include "MB_DataStruct.h"
+#include "DataStruct.h"
 #include "can_app_def.h"
 #include "sc.h"
 

@@ -59,7 +59,7 @@ static void rt_thread_entry_ad(void* parameter)
             adc_i_update();
         }
 		adc_update();
-		data_refresh();
+		task_entry();
 		//update_fpga_data(fpga_buffer);
 		pcmaster_record();
     }

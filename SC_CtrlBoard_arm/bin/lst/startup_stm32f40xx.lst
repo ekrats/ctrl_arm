@@ -871,12 +871,11 @@ ARM Macro Assembler    Page 14
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
 erwork --depend=..\..\bin\obj\startup_stm32f40xx.d -o..\..\bin\obj\startup_stm3
-2f40xx.o -IE:\work\SC_CtrlBoard_arm\SC_CtrlBoard_arm\project\arm\RTE -Id:\Keil_
-v5\ARM\PACK\Keil\STM32F4xx_DFP\2.4.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include 
--Id:\Keil_v5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA 520" --prede
-fine="STM32F407xx SETA 1" --list=..\..\bin\lst\startup_stm32f40xx.lst ..\..\bsp
-\stm32f40x\Libraries\CMSIS\ST\STM32F4xx\Source\Templates\arm\startup_stm32f40xx
-.s
+2f40xx.o -ID:\work\ctrl_arm\SC_CtrlBoard_arm\project\arm\RTE -Id:\Keil_v5\ARM\P
+ACK\Keil\STM32F4xx_DFP\2.4.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include -Id:\Kei
+l_v5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA 520" --predefine="ST
+M32F407xx SETA 1" --list=..\..\bin\lst\startup_stm32f40xx.lst ..\..\bsp\stm32f4
+0x\Libraries\CMSIS\ST\STM32F4xx\Source\Templates\arm\startup_stm32f40xx.s
 
 
 

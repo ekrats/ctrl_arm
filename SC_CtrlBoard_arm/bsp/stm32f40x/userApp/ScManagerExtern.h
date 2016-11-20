@@ -3,7 +3,7 @@
 
 #include "record.h"
 #include "stm32f4xx_can.h"
-#include "MB_DataStruct.h"
+#include "DataStruct.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +16,7 @@ void stm32_hw_io_on(int led);
 void stm32_hw_io_off(int led);
 void stm32_hw_io_toggle(int led);
 void relays_refresh(void);
-void data_refresh(void);
+void task_entry(void);
 void status_updata(void);
 void * GetShareDataPtr(void);
 void gbch_init(void);
