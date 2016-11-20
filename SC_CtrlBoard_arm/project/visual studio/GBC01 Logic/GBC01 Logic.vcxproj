@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{362355B9-3AEC-498F-A2FA-DFC6E1A9AD9D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>GBC01Logic</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>
+    </ReferencePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\bsp\stm32f40x\applications;..\..\..\bsp\stm32f40x\cpptools;..\..\..\bsp\stm32f40x\tools</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\bsp\stm32f40x\applications\bch.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\applications\dataset.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\applications\gbc.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\ACTransducer.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\AFTransducer.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\api.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\Contactor.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\DCTransducer.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\Device.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\Failure.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\FailureCheck.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\IOTransducer.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\ITransducer.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\link.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\list.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\OnOff.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\Product.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\Relay.h" />
+    <ClInclude Include="..\..\..\bsp\stm32f40x\cpptools\RelayModule.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\bsp\stm32f40x\applications\bch.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\applications\gbc.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\applications\gbcapp.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\ACTransducer.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\AFTransducer.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\Contactor.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\DCTransducer.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\Failure.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\FailureCheck.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\IOTransducer.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\Product.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\Relay.cpp" />
+    <ClCompile Include="..\..\..\bsp\stm32f40x\cpptools\RelayModule.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
