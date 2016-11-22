@@ -9,3 +9,5 @@ Sc::Sc(void)
 	sensorList.Add(&iOutPeak);
 	
 }
+
+

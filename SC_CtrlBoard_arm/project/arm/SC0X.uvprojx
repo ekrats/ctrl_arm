@@ -403,24 +403,14 @@
               <FilePath>..\..\bsp\stm32f40x\userApp\logicApp.c</FilePath>
             </File>
             <File>
-              <FileName>Sc.cpp</FileName>
+              <FileName>ThreeLevel.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\bsp\stm32f40x\userApp\Sc.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>ScManager.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\..\bsp\stm32f40x\userApp\ScManager.cpp</FilePath>
+              <FilePath>..\..\bsp\stm32f40x\userApp\ThreeLevel.cpp</FilePath>
             </File>
             <File>
               <FileName>ScBat.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\..\bsp\stm32f40x\userApp\ScBat.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>ScCheck.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\..\bsp\stm32f40x\userApp\ScCheck.cpp</FilePath>
             </File>
             <File>
               <FileName>canApp.cpp</FileName>

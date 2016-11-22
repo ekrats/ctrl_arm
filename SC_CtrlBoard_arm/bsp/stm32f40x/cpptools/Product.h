@@ -81,7 +81,7 @@ protected:
     // 摘要: 
     //     延时模块。
     RelayModule relays;
-private:
+protected:
     // 摘要: 
     //     刷新传感器列表中所有传感器的数据。
     //

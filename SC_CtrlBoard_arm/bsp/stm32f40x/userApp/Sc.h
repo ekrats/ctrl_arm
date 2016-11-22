@@ -22,5 +22,9 @@ public:
 	NTC igbt1Temp;
 	NTC igbt2Temp;
 
-	bool sensorListLock;
+private:
+	static Sc* _instance;
+
+public:
+	static Sc* Instance(void);
 };

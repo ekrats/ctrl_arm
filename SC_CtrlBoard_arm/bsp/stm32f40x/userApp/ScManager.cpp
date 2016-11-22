@@ -13,21 +13,12 @@
 #define DS_SC
 
 ScManager sc;
-CanApp can(sc.shareData);
+//CanApp can(sc.shareData);
 
-Config_STYP config = Config_STYP_DEFAULT;
+
 
 Event<int> event;
 
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
 void ScManager::Init(void)
 {
 	//------------------------------------------------------
@@ -36,15 +27,7 @@ void ScManager::Init(void)
 	
 	FaultCheckModuleInit();
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+
 int * buffer = NULL;
 void ad_init(void)
 {
@@ -60,48 +43,27 @@ void ad_init(void)
 
 }
 
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void sc_init(void)
+void sc_init1(void)
 {
-	can.Init();
-	sc.SetCan(&can);
+//	can.Init();
+//	sc.SetCan(&can);
 	
 	ad_init();
 	fault_init();
 	sc.Init();
 }
 
-/*******************************************************************************
-* Function Name  :  MonitorStatusUpdata(void)
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void ScManager::MonitorStatusUpdata(void)
+void ScManager::StatusUpdata(void)
 {
-	
+	shareData.ad.u_in = sc.inVolt.GetAverageRealValue();
+	shareData.ad.i_out = sc.batCurr.GetAverageRealValue();
+	shareData.ad.u_out = sc.outVolt.GetAverageRealValue();
+	shareData.ad.u_cfly = sc.cFlyVolt.GetAverageRealValue();
+	shareData.ad.temp_igpt1 = sc.igbt1Temp.GetRealValue();
+	shareData.ad.temp_igpt2 = sc.igbt2Temp.GetRealValue();
+
 }
 
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
 void ScManager::SetCan(CanApp* can)
 {
 	this->pCan = can;
@@ -111,104 +73,39 @@ void ScManager::Run(void)
 {
 	
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void ScManager::FaultDeal(void)
-{
-	shareData.status.status_bit.wFault = shareData.output.warn.warn_u32 > 0;
-	if (shareData.status.status_bit.sFault == 0 && shareData.output.fault.fault_u32 > 0)
-	{
-		//--------------------------------------------------------//
-		//系统故障生成事件记录
-		//--------------------------------------------------------//
-		shareData.status.status_bit.sFault = true;
-	}
-	else if (shareData.status.status_bit.sFault == 1 && shareData.output.fault.fault_u32 == 0)
-	{
-		//--------------------------------------------------------//
-		//系统故障消除事件记录
-		//--------------------------------------------------------//
-		shareData.status.status_bit.sFault = false;
-	}
-}
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void task_entry(void)
+
+
+void task_entry1(void)
 {
 	sc.RefreshAdData();
+	
+	sc.FastCheck();
+	
 	
 	
 }
 
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+
 void state_control(void)
 {
 	sc.Run();
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+
 void status_updata(void)
 {
 	sc.SlowCheck();
 	
-	sc.MonitorStatusUpdata();
-	
-	sc.FaultDeal();
+	sc.StatusUpdata();
 	
 	fault_check();
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+
 void relays_refresh(void)
 {
 	sc.RelayRun();
 }
-/*******************************************************************************
-* Function Name  :  
-* Description    :
-*
-*
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void * GetShareDataPtr(void)
+
+void * GetShareDataPtr1(void)
 {
 	ScData * p = &(sc.shareData);
 	return p;

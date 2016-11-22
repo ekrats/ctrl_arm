@@ -6,7 +6,7 @@
 #include "can.h"
 #include "can_app_def.h"
 #include "ScManagerExtern.h"
-#include "ScManager.h"
+#include "ThreeLevel.h"
 #include "DataStruct.h"
 
 extern CanApp can;

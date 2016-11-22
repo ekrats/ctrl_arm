@@ -94,18 +94,13 @@ typedef struct{
 }CB_Adjust_STYP;
 
 typedef struct{
-	int16_t i_in1;
-	int16_t i_in2;
+	int16_t u_in;
+	int16_t u_cfly;
+	int16_t u_out;
 	int16_t i_out;
-	int16_t u_ac1;
-	int16_t u_bus;
-	int16_t u_out1;
-	int16_t u_out2;
-	int16_t u_out3;
-	int16_t temp_module1;
-	int16_t temp_module2;
-	int16_t temp_cap1;
-	int16_t temp_cap2;
+	int16_t i_peak;
+	int16_t temp_igpt1;
+	int16_t temp_igpt2;
 }ad_data_t;
 
 typedef struct 
@@ -283,7 +278,6 @@ typedef struct{
 	CB_Para_STYP	cbWrPara;
 	CB_Adjust_STYP	cbAdj;
 	CB_Adjust_STYP	cbWrAdj;
-	//HMI_TYPE 	hmi;
 	canAppBuf_config canAppBuf;
 }ScData;
 

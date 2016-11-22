@@ -140,17 +140,17 @@ void ScManager::UpdateSlowState(void)
 *******************************************************************************/
 void ScManager::RefreshAdData(void)
 {
-    if (!sensorListLock)
-	{
-		sensorListLock = true;
-		sensorList.Begin();
-		ITransducer * tmp = NULL;
-		while ((tmp = sensorList.Next()) != NULL)
-		{
-			tmp->Update();
-		}
-		sensorListLock = false;
-	}
+//    if (!sensorListLock)
+//	{
+//		sensorListLock = true;
+//		sensorList.Begin();
+//		ITransducer * tmp = NULL;
+//		while ((tmp = sensorList.Next()) != NULL)
+//		{
+//			tmp->Update();
+//		}
+//		sensorListLock = false;
+//	}
 }
 
 
@@ -220,14 +220,10 @@ void ScManager::RelayRun(void)
 
 void ScManager::SlowCheck(void)
 {
-	MonitorCheckSlow();
 	
-	RefreshSlowList();
-
-	UpdateSlowState();
 }
 
-void ScManager::MonitorCheckSlow(void)
+void ScManager::FastCheck(void)
 {
 	
 }

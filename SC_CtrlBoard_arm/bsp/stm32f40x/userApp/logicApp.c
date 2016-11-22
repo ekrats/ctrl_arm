@@ -28,14 +28,12 @@ static void rt_thread_entry_logic(void* parameter)
 	sc_init();
 	flash_record_init();
 	rt_thread_delay(2000);
-//	p->status.status_bit.rParFlag = true;
-//	p->status.status_bit.rAdjFlag = true;
+	p->status.status_bit.rParFlag = true;
+	p->status.status_bit.rAdjFlag = true;
 	
     while(1)
     {
-        relays_refresh();
-		status_updata();
-		state_control();
+		state_entry();
 		UserRecord();
 		rt_thread_delay(10);
     }
@@ -59,7 +57,7 @@ static void rt_thread_entry_ad(void* parameter)
             adc_i_update();
         }
 		adc_update();
-		task_entry();
+		bat_entry();
 		//update_fpga_data(fpga_buffer);
 		pcmaster_record();
     }

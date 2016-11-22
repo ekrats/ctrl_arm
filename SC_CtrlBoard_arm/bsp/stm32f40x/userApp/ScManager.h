@@ -19,12 +19,11 @@ public:
 	void Run(void);
 	void RelayRun(void);
 	void RefreshAdData(void);
-	void MonitorStatusUpdata(void);
-	void FaultDeal(void);
+	void StatusUpdata(void);
 	
 	void SetCan(CanApp* pCan);
 	void SlowCheck(void);
-	void MonitorCheckSlow(void);
+	void FastCheck(void);
 	void FaultCheckModuleInit(void);
 		
 private:
