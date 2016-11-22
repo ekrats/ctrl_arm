@@ -10,36 +10,37 @@
 #include "DataStruct.h"
 
 extern CanApp can;
+extern ScData shareData;
 
 /****************************************************************
 * Description    CAN ˝æ›÷° ≈‰÷√±Ì
 *****************************************************************/
 static STD_MSG_CON_TB _std_msg_table[CAN_STD_FRAME_NUM] = 
 { 
-	/*port     type          dest         src       func                   		 len    rxFrame  update   candata              */
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_CHARGE,    		8,     0,      0, 	 (uint8_t *)&can.CanBuf.dcdcCmd,    (uint8_t *)&can.sCan.canAppBuf.dcdcCmd,    		can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.mxcx_id,    can.mon_id,  	CAN_FUNC_REBOOT,	   		8,     0,      0, 	 can.CanBuf.reBoot,   				(uint8_t *)&can.sCan.canAppBuf.reBoot,    		RT_NULL},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_SET_PARA,  	   24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbWrPara,    (uint8_t *)&can.sCan.cbWrPara,    				can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_SET_ADJUST,       24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbWrAdj,    (uint8_t *)&can.sCan.cbWrAdj,    				can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_S_POLL,     		8,     7,      0,    can.CanBuf.null,    				(uint8_t *)&can.sCan.canAppBuf.null,    		RT_NULL},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_P_POLL,	        8,     8,      0, 	 can.CanBuf.null,   				(uint8_t *)&can.sCan.canAppBuf.null,    		RT_NULL},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_AD_POLL,	        8,     9,      0, 	 can.CanBuf.null,   				(uint8_t *)&can.sCan.canAppBuf.null,    		RT_NULL},
+	/*port     type          dest         src       func                   		 len    txFrame  update   candata              */
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_CHARGE,    		8,     0,      0, 	 (uint8_t *)&can.CanBuf.dcdcCmd,    (uint8_t *)&shareData.canAppBuf.dcdcCmd,    	can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.mxcx_id,    can.mon_id,  	CAN_FUNC_REBOOT,	   		8,     0,      0, 	 can.CanBuf.reBoot,   				(uint8_t *)&shareData.canAppBuf.reBoot,    		RT_NULL},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_SET_PARA,  	   24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbWrPara,   (uint8_t *)&shareData.cbWrPara,    				can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_SET_ADJUST,       24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbWrAdj,    (uint8_t *)&shareData.cbWrAdj,    				can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_S_POLL,     		8,     7,      0,    can.CanBuf.null,    				(uint8_t *)&shareData.canAppBuf.null,    		RT_NULL},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_P_POLL,	        8,     8,      0, 	 can.CanBuf.null,   				(uint8_t *)&shareData.canAppBuf.null,    		RT_NULL},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_AD_POLL,	        8,     9,      0, 	 can.CanBuf.null,   				(uint8_t *)&shareData.canAppBuf.null,    		RT_NULL},
 
-	{PORTx, CAN_ZX_DIRC, can.mxcx_id,     can.ctrl_id,  	CAN_FUNC_S_POLL,           24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbStatus,   (uint8_t *)&can.sCan.cbStatus,    				RT_NULL},
-	{PORTx, CAN_ZX_DIRC, can.mxcx_id,     can.ctrl_id,  	CAN_FUNC_P_POLL,           24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbPara,     (uint8_t *)&can.sCan.cbPara,    				RT_NULL},
-	{PORTx, CAN_ZX_DIRC, can.mxcx_id,     can.ctrl_id,  	CAN_FUNC_AD_POLL,          24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbAdj,      (uint8_t *)&can.sCan.cbAdj,    					RT_NULL},	
+	{PORTx, CAN_ZX_DIRC, can.mxcx_id,    can.ctrl_id,  	CAN_FUNC_S_POLL,           24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbStatus,   (uint8_t *)&shareData.cbStatus,    				RT_NULL},
+	{PORTx, CAN_ZX_DIRC, can.mxcx_id,    can.ctrl_id,  	CAN_FUNC_P_POLL,           24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbPara,     (uint8_t *)&shareData.cbPara,    				RT_NULL},
+	{PORTx, CAN_ZX_DIRC, can.mxcx_id,    can.ctrl_id,  	CAN_FUNC_AD_POLL,          24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbAdj,      (uint8_t *)&shareData.cbAdj,    				RT_NULL},	
 	                                                                               
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_CHECK,   	    8,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_check,  (uint8_t *)&can.sCan.canAppBuf.iap_check,    	can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_INFO,  	 0x10,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_info,   (uint8_t *)&can.sCan.canAppBuf.iap_info,    	can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_WRITE,      0xff,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_file,   (uint8_t *)&can.sCan.canAppBuf.iap_file,    	can.MsgRx_Deal},
-	{PORTx, CAN_ZX_DIRC, can.mxcx_id,  	 can.ctrl_id,   CAN_FUNC_IAP,   		    8,     0,      0, 	 (uint8_t *)&can.CanBuf.iap_reply,  (uint8_t *)&can.sCan.canAppBuf.iap_reply,    	RT_NULL},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_CHECK,   	    8,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_check,  (uint8_t *)&shareData.canAppBuf.iap_check,    	can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_INFO,  	 0x10,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_info,   (uint8_t *)&shareData.canAppBuf.iap_info,    	can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_WRITE,      0xff,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_file,   (uint8_t *)&shareData.canAppBuf.iap_file,    	can.MsgRx_Deal},
+	{PORTx, CAN_ZX_DIRC, can.mxcx_id,  	 can.ctrl_id,   CAN_FUNC_IAP,   		    8,     0,      0, 	 (uint8_t *)&can.CanBuf.iap_reply,  (uint8_t *)&shareData.canAppBuf.iap_reply,    	RT_NULL},
 };
 
 //static __IO STD_MSG_CON_TB *_std_msg = _std_msg_table;
 
 extern u16 local_id;
 
-CanApp::CanApp(ScData & scCan):sCan(scCan)                                                                                                                                                   
+CanApp::CanApp()                                                                                                                                            
 {
 	_std_msg = _std_msg_table;
 	

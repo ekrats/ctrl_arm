@@ -270,6 +270,7 @@ typedef struct
 }canAppBuf_config;
 
 typedef struct{
+	fpga_data fpga;
 	ad_data_t	ad;
 	sc_info_t	output;
 	sc_status_t status;

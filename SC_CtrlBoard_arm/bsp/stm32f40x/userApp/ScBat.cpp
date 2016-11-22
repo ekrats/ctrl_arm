@@ -33,20 +33,26 @@ void ScBat::RefreshState()
 	UpdateFaultState();
 }
 
-void ScBat::SoftStartCh()
+void ScBat::On()
 {
-	switch (state_ch)
+	if (!isStartEnable)
 	{
-		case SOFT_START_CHARGE:
+		Device::On();
+		state = SC_SOFT_START;
+	}
+	
+	switch (state)
+	{
+		case SC_SOFT_START:
 			iReference += 10;
 			if (iTarget <= iReference)
 			{
 				iReference = iTarget;
-				state_ch = CURR_LIMITED_CHARGE;
+				state = SC_CURR_LIMITED;
 			}
 			break;
 			
-		case CURR_LIMITED_CHARGE:
+		case SC_CURR_LIMITED:
 			if (iTarget > (iReference + 5))
 			{
 				iReference += 5;
@@ -61,61 +67,7 @@ void ScBat::SoftStartCh()
 			}
 				
 			break;
-		case POWER_LIMITED_CHARGE:
-			break;
-		default:
-			break;
-	}
-}
-
-void ScBat::SoftStartDisCh()
-{
-	switch (state_disch)
-	{
-		case SOFT_START_DISCH:
-			iReference -= 10;
-			if (iTarget >= iReference)
-			{
-				iReference = iTarget;
-				state_ch = CURR_LIMITED_CHARGE;
-			}
-			break;
-			
-		case CURR_LIMITED_DISCH:
-			if (iTarget < (iReference - 5))
-			{
-				iReference -= 5;
-			}
-			else if (iTarget > (iReference + 5))
-			{
-				iReference += 5;
-			}
-			else
-			{
-				iReference = iTarget;
-			}
-				
-			break;
-		default:
-			break;
-	}
-}
-
-void ScBat::On()
-{
-	if (!isStartEnable)
-	{
-		Device::On();
-		state_ch = SOFT_START_CHARGE;
-	}
-	
-	switch (startMode)
-	{
-		case SC_START_CHARGE:
-			SoftStartCh();
-			break;
-		case SC_START_DISCHARGE:
-			SoftStartDisCh();
+		case SC_POWER_LIMITED:
 			break;
 		default:
 			break;
@@ -127,8 +79,7 @@ void ScBat::Off()
 	if (isStartEnable)
 	{
 		Device::Off();
-		state_ch = STOP_CHARGE;
-		state_disch = STOP_DISCH;
+		state = SC_STOP;
 		duty1 = 0;
 		duty2 = 0;
 		cFlyDuty = 0;
@@ -321,19 +272,16 @@ void ScBat::ChargeCtrl()
 			cutTime = 0;
 		}
 	}
-	
 }
 
 void ScBat::DisChargeCtrl()
 {
 	int iBat = 0;
-	int uOut = 0;
 	int uIn = 0;
 	int uInFilt = 0;
 	int uCFly = 0;
 	
 	iBat = batCurr.GetIRealValue();
-	uOut = outVolt.GetIRealValue();
 	uOutFilt = outVolt.GetAverageRealValue();
 	uIn = inVolt.GetIRealValue();
 	uInFilt = inVolt.GetAverageRealValue();
@@ -343,7 +291,7 @@ void ScBat::DisChargeCtrl()
     pidVoltage.Update();
 
     pidBatteryCurrent.reference = iReference;
-    pidBatteryCurrent.feedback = iBat;
+    pidBatteryCurrent.feedback = -iBat;
     pidBatteryCurrent.Update();
     
     pidCfly.reference = 0;
@@ -503,4 +451,5 @@ void ScBat::UOutCheck()
 
 void ScBat::SetSharedData(void * sharedData)
 {
+	this->scData = (ScData *)sharedData;
 }

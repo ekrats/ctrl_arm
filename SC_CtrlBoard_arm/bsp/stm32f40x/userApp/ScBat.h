@@ -7,21 +7,14 @@
 #include "PID.h"
 #include "NTC.h"
 #include "DCTransducer.h"
+#include "DataStruct.h"
 
-enum STATE_CHARGE
+enum SC_STATE
 {
-    STOP_CHARGE,
-    SOFT_START_CHARGE,
-    CURR_LIMITED_CHARGE,
-    POWER_LIMITED_CHARGE,
-};
-
-enum STATE_DISCH
-{
-    STOP_DISCH,
-    SOFT_START_DISCH,
-    CURR_LIMITED_DISCH,
-    POWER_LIMITED_DISCH,
+    SC_STOP,
+    SC_SOFT_START,
+    SC_CURR_LIMITED,
+    SC_POWER_LIMITED,
 };
 
 enum SC_START_MODE
@@ -72,14 +65,14 @@ public:
 		kpInRipple = 7;
 		//kiInRipple = 0;
 		thresholdDuty = 16000;
-		iTarget = 2000;
+		iTarget = 200;
 	}
 
 private:
-	STATE_CHARGE state_ch;
-	STATE_DISCH state_disch;
+	SC_STATE state;
 	SC_START_MODE startMode;
 
+	ScData * scData;
 public:
 	void Init();
 	void RefreshState();
@@ -94,11 +87,23 @@ public:
     virtual void FaultCheckModuleInit();
     virtual void UpdateFaultState();
     virtual void RefreshRelay();
-
-private:
-	void SoftStartCh();
-	void SoftStartDisCh();
+	inline  void StartMode(SC_START_MODE mode ) { startMode = mode ;};
 	
+	void SetUOutTarget(int value)
+	{
+		if ((value < 900) && (value > 0))
+		{
+			uTarget = value;
+		}
+	}
+	
+	void SetIOutTarget(int value)
+	{
+		if ((value <= 225) && (value > 0))
+		{
+			iTarget = value;
+		}
+	}
 private:
     PID pidVoltage;
     PID pidBatteryCurrent;
@@ -190,7 +195,6 @@ private:
 	Relay igbt1TOverHoldTime;
 	Relay igbt2TOverHoldTime;
 	
-
 	Counter iBatMinCount;
 	Counter iBatMaxCount;
 	Counter uBatMinCount;

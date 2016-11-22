@@ -1,5 +1,6 @@
 #include "ThreeLevel.h"
 #include "ScManagerExtern.h"
+#include "fsmc.h"
 #include "record.h"
 #include "canApp.h"
 #include "io.h"
@@ -8,7 +9,8 @@
 
 ThreeLevel tl;
 ScData shareData;
-CanApp can(shareData);
+
+CanApp can;
 Config_STYP config = Config_STYP_DEFAULT;
 
 int faultMast = 0xFFFF;
@@ -69,17 +71,28 @@ void ThreeLevel::BatControl()
 	
 	this->Run();
 	
-	fpga.duty1 = this->duty1;
-	fpga.duty2 = this->duty2;
+	scData->fpga.duty1 = this->duty1;
+	scData->fpga.duty2 = this->duty2;
+	if (startMode == 2)
+	{
+		scData->fpga.discharge = true;
+	}
+	else
+	{
+		scData->fpga.discharge = false;
+	}
 	
 	set_target_current(i_control);
 	
-	fpga.enable = scBat.IsRun();
+	scData->fpga.enable = scBat.IsRun();
 	
+	update_fpga_data(&scData->fpga);
 }
 
 void ThreeLevel::StateControl()
 {
+	int ctrlOrd = scData->canAppBuf.dcdcCmd.ord;
+	
 	RefreshData();
 	
 	scBat.SlowCheck();
@@ -87,7 +100,9 @@ void ThreeLevel::StateControl()
 	RefreshRelay();
 	
 	if ((sys_fault & faultMast) == 0
-	  &&(sys_lock & faultMast) == 0)
+	  &&(sys_lock & faultMast) == 0
+	  && (ctrlOrd > 0)
+	  && ctrlOrd == startMode)
 	{
 		this->On();
 		faultKeepTime.Stop();
@@ -101,19 +116,33 @@ void ThreeLevel::StateControl()
 			scBat.ResetFaulture();
 		}
 	}
+	
+	if (ctrlOrd == 1)
+	{
+		startMode = SC_START_CHARGE;
+	}
+	else if (ctrlOrd == 2)
+	{
+		startMode = SC_START_DISCHARGE;
+	}
+	else
+	{
+		startMode = SC_START_NONE;
+	}
 }
 
 void ThreeLevel::On()
 {
 	if (!isStartEnable)
 	{
+		scBat.StartMode(startMode);
 		restartTime.Start();
 	}
 	
 	if (restartTime.GetResult())
 	{
 		Product::On();
-		//ģʽ
+		
 		scBat.On();
 	}
 }

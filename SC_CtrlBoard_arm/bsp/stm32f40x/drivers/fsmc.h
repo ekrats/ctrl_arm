@@ -12,12 +12,18 @@
 #ifndef PROJECT_CM80A_SLAVE_FSMC_H
 #define PROJECT_CM80A_SLAVE_FSMC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FPGA_ADDRESS   (0x60000000)
-//#define MVB_ADDRESS   (0x60000000)
-//#define RAM_ADDRESS   (0x68000000)
-//#define Bank1_SRAM2_ADDR       ((u32)0x64000000)
+
 void fsmc_fpga_init(void);
 void update_fpga_data(void * buffer);
 
+#ifdef __cplusplus
+}
+#endif
+	
 #endif
 //////////////////////////////////////////////////////////////////////////

@@ -13,16 +13,14 @@ private:
 	STD_MSG_CON_TB *_std_msg;
 	
 public:
-	ScData & sCan;
 	CanApp(void);
-	CanApp(ScData & scCan);
 	CanBuf_config CanBuf;
 	uint16_t    CanCnt;
 	uint16_t ctrl_id;
 	uint16_t mxcx_id;
 	uint16_t mon_id;
-	int    CanStateWord;
-	int			canOffTime;
+	int	CanStateWord;
+	int	canOffTime;
 
 	void Init(void);
 	void TriggerMsgUpdate_data(uint8_t frame);

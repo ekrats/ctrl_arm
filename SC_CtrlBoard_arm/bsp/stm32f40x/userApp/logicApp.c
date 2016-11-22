@@ -6,7 +6,6 @@
 #include "static_mem.h"
 #include "ad.h"
 #include "pcmaster.h"
-#include "fsmc.h"
 #include "record.h"
 #include "DataStruct.h"
 
@@ -47,7 +46,7 @@ static void rt_thread_entry_ad(void* parameter)
 	adc_init();
 	rt_sem_init(&sem_ad_task, "ad", 1, 1);
     rt_thread_delay(1000);
-    
+	
     ADC_SoftwareStartConv(ADC2);
 	while(1)
     {
@@ -58,7 +57,6 @@ static void rt_thread_entry_ad(void* parameter)
         }
 		adc_update();
 		bat_entry();
-		//update_fpga_data(fpga_buffer);
 		pcmaster_record();
     }
 }

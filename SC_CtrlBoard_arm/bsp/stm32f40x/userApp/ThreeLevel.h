@@ -30,7 +30,9 @@ public:
 	
 private:
 	ScBat scBat;
-	fpga_data fpga;
+
+private:
+	SC_START_MODE startMode;
 
 private:
 	Relay faultKeepTime;
