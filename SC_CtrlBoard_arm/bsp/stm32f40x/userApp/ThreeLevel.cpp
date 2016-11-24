@@ -60,6 +60,7 @@ void ThreeLevel::RefreshLocalData()
 
 void ThreeLevel::RefreshCanData()
 {
+	scData->output.fault.fault_u32 = this->sys_fault;
 	scData->cbStatus.capvoltW = scData->ad.u_out;
 	scData->cbStatus.currW = scData->ad.i_out;
 	scData->cbStatus.flyingCapvoltW = scData->ad.u_cfly;

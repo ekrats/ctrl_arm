@@ -202,7 +202,7 @@ typedef union _sc_fault_t
         uint16_t l_low;
         uint16_t l_high;
     }fault_u16;
-    uint32_t fault_u32;
+	uint32_t fault_u32;
 }sc_fault_t;
 
 

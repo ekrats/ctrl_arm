@@ -107,6 +107,7 @@ void ScBat::Off()
 		pidBatteryCurrent.Reset();
 		pidIOutPeak.Reset();
 		pidCfly.Reset();
+		relays.Reset();
 	}
 	uReference = outVolt.GetIRealValue();
 	
@@ -192,7 +193,7 @@ void ScBat::ChargeCtrl()
     pidVoltage.Update();
     
     pidIOutPeak.reference = iOutPeak.GetAverageRealValue();
-    pidIOutPeak.feedback =  iOutPeak.GetIRealValue();;
+    pidIOutPeak.feedback =  iOutPeak.GetIRealValue();
     pidIOutPeak.Update(0);
 
     pidBatteryCurrent.reference = iReference;

@@ -66,21 +66,21 @@ public:
 		iTarget = 200;
 		
 		iBatMin1HoldTime.SetRelayTime(200);
-		iBatMin2HoldTime.SetRelayTime(200);
+		iBatMin2HoldTime.SetRelayTime(100);
 		iBatMax1HoldTime.SetRelayTime(200);
-		iBatMax2HoldTime.SetRelayTime(200);
+		iBatMax2HoldTime.SetRelayTime(100);
 		uBatMax1HoldTime.SetRelayTime(200);
-		uBatMax2HoldTime.SetRelayTime(200);
+		uBatMax2HoldTime.SetRelayTime(100);
 		uInMax1HoldTime.SetRelayTime(200);
-		uInMax2HoldTime.SetRelayTime(200);
+		uInMax2HoldTime.SetRelayTime(100);
 		uInBat1HoldTime.SetRelayTime(200);
-		uInBat2HoldTime.SetRelayTime(200);
+		uInBat2HoldTime.SetRelayTime(100);
 		igbt1TOver1HoldTime.SetRelayTime(200);
-		igbt1TOver2HoldTime.SetRelayTime(200);
+		igbt1TOver2HoldTime.SetRelayTime(100);
 		igbt2TOver1HoldTime.SetRelayTime(200);
-		igbt2TOver2HoldTime.SetRelayTime(200);
+		igbt2TOver2HoldTime.SetRelayTime(100);
 		uCFly1HoldTime.SetRelayTime(200);
-		uCFly2HoldTime.SetRelayTime(200);
+		uCFly2HoldTime.SetRelayTime(100);
 	}
 
 private:
