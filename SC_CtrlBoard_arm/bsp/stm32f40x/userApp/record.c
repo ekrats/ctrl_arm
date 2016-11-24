@@ -239,7 +239,6 @@ void sys_par_read(void)
 void UserRecord(void)
 {
 	ScData * p = (ScData *)GetShareDataPtr();
-	static uint8_t cnt = 0;
 	
 	if (p->status.status_bit.wParFlag)
 	{
@@ -272,11 +271,8 @@ void UserRecord(void)
 		start_read_fault();
 	}
 	
-	if (++cnt % 10 == 0)
-	{
-		push_ad_record();
-		cnt = 0;
-	}
+	push_ad_record();
+		
 }
 
 /******************* (C) COPYRIGHT 2015 TongYe **********END OF FILE****/

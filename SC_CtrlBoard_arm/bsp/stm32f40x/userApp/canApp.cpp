@@ -231,13 +231,6 @@ void CanApp::MsgRx_Manage(CAN_RX_DATA_RAM* pbuf, uint32_t _tId)
 				
 				RxMsgUpdate_data();
 				
-				//回复
-				if (_std_msg[ScanFrame].txFrame > 0)
-				{
-					_std_msg[_std_msg[ScanFrame].txFrame].canPort = _p->parent.CanPort;
-					SendCan(_std_msg[ScanFrame].txFrame);
-				}
-				
 				switch (_tRecStdId->st.func)
 				{
 					case CAN_FUNC_CHARGE:
@@ -253,12 +246,25 @@ void CanApp::MsgRx_Manage(CAN_RX_DATA_RAM* pbuf, uint32_t _tId)
 						break;
 					
 					case CAN_FUNC_REBOOT:
+						shareData.canAppBuf.dcdcCmd.ctrlMode = 0;
+						rt_thread_delay(RT_TICK_PER_SECOND/8);
+						NVIC_SystemReset();
 						break;
 					
 					case CAN_FUNC_SET_PARA:
+						if (rt_memcmp((const void *)&shareData.cbWrPara, (const void *)&shareData.cbPara, sizeof(CB_Para_STYP)))
+						{
+							shareData.cbPara = shareData.cbWrPara;
+							shareData.status.status_bit.wParFlag  = true;
+						}
 						break;
 					
 					case CAN_FUNC_SET_ADJUST:
+						if (rt_memcmp((const void *)&shareData.cbWrAdj, (const void *)&shareData.cbAdj, sizeof(CB_Adjust_STYP)))
+						{
+							shareData.cbAdj = shareData.cbWrAdj;
+							shareData.status.status_bit.wAdjFlag  = true;
+						}
 						break;
 					
 					case CAN_FUNC_IAP_INFO:
@@ -272,6 +278,12 @@ void CanApp::MsgRx_Manage(CAN_RX_DATA_RAM* pbuf, uint32_t _tId)
 					
 					default:
 						break;
+				}
+				//自动回复
+				if (_std_msg[ScanFrame].txFrame > 0)
+				{
+					_std_msg[_std_msg[ScanFrame].txFrame].canPort = _p->parent.CanPort;
+					SendCan(_std_msg[ScanFrame].txFrame);
 				}
 				
 				can.CanCnt = 0;				

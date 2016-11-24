@@ -826,6 +826,11 @@
               <FileType>8</FileType>
               <FilePath>..\..\bsp\stm32f40x\cpptools\ScFailure.cpp</FilePath>
             </File>
+            <File>
+              <FileName>Counter.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\bsp\stm32f40x\cpptools\Counter.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

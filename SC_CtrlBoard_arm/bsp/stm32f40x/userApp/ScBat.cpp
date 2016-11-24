@@ -1,4 +1,5 @@
 #include "ScBat.h"
+#include "api.h"
 #include "ad.h"
 
 void ScBat::Init()
@@ -35,43 +36,60 @@ void ScBat::RefreshState()
 
 void ScBat::On()
 {
+	uOutFilt = outVolt.GetAverageRealValue();
+	int iTemp;
+	
 	if (!isStartEnable)
 	{
 		Device::On();
 		state = SC_SOFT_START;
 	}
 	
+	if (isConstP)
+	{
+		if (uOutFilt < 1000)
+		{
+			iTemp = iTarget;
+		}
+		else
+		{
+			//20kw 恒功率
+			iTemp = 2000000 / uOutFilt;
+		}
+	}
+	else
+	{
+		iTemp = iTarget;
+	}
+	
 	switch (state)
 	{
 		case SC_SOFT_START:
 			iReference += 10;
-			if (iTarget <= iReference)
+			if (iTemp <= iReference)
 			{
-				iReference = iTarget;
-				state = SC_CURR_LIMITED;
+				iReference = iTemp;
+				state = SC_CURR_LIMITTED;
 			}
 			break;
-			
-		case SC_CURR_LIMITED:
-			if (iTarget > (iReference + 5))
+		case SC_CURR_LIMITTED:
+			if (iTemp > (iReference + 5))
 			{
 				iReference += 5;
 			}
-			else if (iTarget < (iReference - 5))
+			else if (iTemp < (iReference - 5))
 			{
 				iReference -= 5;
 			}
 			else
 			{
-				iReference = iTarget;
+				iReference = iTemp;
 			}
-				
-			break;
-		case SC_POWER_LIMITED:
 			break;
 		default:
 			break;
 	}
+	
 }
 
 void ScBat::Off()
@@ -79,12 +97,12 @@ void ScBat::Off()
 	if (isStartEnable)
 	{
 		Device::Off();
-		state = SC_STOP;
 		duty1 = 0;
 		duty2 = 0;
 		cFlyDuty = 0;
 		presentDuty = 0;
 		iReference = 0;
+		isSteady = false;
 		pidVoltage.Reset();
 		pidBatteryCurrent.Reset();
 		pidIOutPeak.Reset();
@@ -195,8 +213,7 @@ void ScBat::ChargeCtrl()
 		//恒流控制
         presentDuty = dutyBattary;
         pidVoltage.Reset(presentDuty * 200);
-//        isSteady = true;
-//        pidMode = 1;
+        isSteady = true;
 	}
 	else
 	{
@@ -204,7 +221,6 @@ void ScBat::ChargeCtrl()
         presentDuty = dutyVoltage;
         iPeakDuty = 0;
         pidBatteryCurrent.Reset(presentDuty * 200);
-//        pidMode = 3;
 	}
 	
 	if (presentDuty > 500)
@@ -307,8 +323,7 @@ void ScBat::DisChargeCtrl()
 		//恒流控制
         presentDuty = dutyBattary;
         pidVoltage.Reset(presentDuty * 200);
-//        isSteady = true;
-//        pidMode = 1;
+        isSteady = true;
 	}
 	else
 	{
@@ -316,7 +331,6 @@ void ScBat::DisChargeCtrl()
         presentDuty = dutyVoltage;
         iPeakDuty = 0;
         pidBatteryCurrent.Reset(presentDuty * 200);
-//        pidMode = 3;
 	}
 	
 	if (presentDuty > thresholdDuty)
@@ -354,35 +368,40 @@ void ScBat::DisChargeCtrl()
 
 void ScBat::FaultCheckModuleInit()
 {
-	failureList.Add(&canLost);
-	failureList.Add(&iBatMinSlow);
-	failureList.Add(&iBatMaxSlow);
-	failureList.Add(&uBatMinSlow);
-	failureList.Add(&uBatMaxSlow);
 	failureList.Add(&uInMaxSlow);
-	failureList.Add(&uInMinSlow);
+	failureList.Add(&uCfly);
+	failureList.Add(&iBatMaxSlow);
+	failureList.Add(&iBatMinSlow);
+	failureList.Add(&uBatMaxSlow);
+	failureList.Add(&uInBatSlow);
 	failureList.Add(&igbt1TempOver);
 	failureList.Add(&igbt2TempOver);
 	failureList.Add(&iBatMaxHW);
+	failureList.Add(&uFlyMaxHW);
 	failureList.Add(&uBatMaxHW);
-	failureList.Add(&iBatMinFast);
-	failureList.Add(&iBatMaxFast);
-	failureList.Add(&uBatMinFast);
-	failureList.Add(&uBatMaxFast);
-	failureList.Add(&uInMaxFast);
-	failureList.Add(&uInMinFast);
-	failureList.Add(&shortCurr);
-	failureList.Add(&uCfly);
 	
-	relays.Register(&canLostHoldTime);
-    relays.Register(&iBatMinHoldTime);
-    relays.Register(&iBatMaxHoldTime);
-    relays.Register(&uBatMinHoldTime);
-    relays.Register(&uBatMaxHoldTime);
-    relays.Register(&uInMaxHoldTime);
-    relays.Register(&uInMinHoldTime);
-	relays.Register(&igbt1TOverHoldTime);
-    relays.Register(&igbt2TOverHoldTime);
+	failureList.Add(&uInMaxFast);
+	failureList.Add(&iBatMaxFast);
+	failureList.Add(&iBatMinFast);
+	failureList.Add(&uBatMaxFast);
+	failureList.Add(&uInBatFast);
+	
+    relays.Register(&iBatMin1HoldTime);
+	relays.Register(&iBatMin2HoldTime);
+    relays.Register(&iBatMax1HoldTime);
+	relays.Register(&iBatMax2HoldTime);
+    relays.Register(&uBatMax1HoldTime);
+	relays.Register(&uBatMax2HoldTime);
+    relays.Register(&uInMax1HoldTime);
+	relays.Register(&uInMax2HoldTime);
+	relays.Register(&uInBat1HoldTime);
+	relays.Register(&uInBat2HoldTime);
+	relays.Register(&igbt1TOver1HoldTime);
+    relays.Register(&igbt1TOver2HoldTime);
+	relays.Register(&igbt2TOver1HoldTime);
+    relays.Register(&igbt2TOver2HoldTime);
+	relays.Register(&uCFly1HoldTime);
+    relays.Register(&uCFly2HoldTime);
 }
 
 void ScBat::FastCheck()
@@ -399,9 +418,222 @@ void ScBat::FastCheck()
 
 void ScBat::SlowCheck()
 {
-	UInCheck();
-	IOutCheck();
+	if (isStartEnable)
+	{
+		UInCheck();
+		IOutCheck();
+		UCflyCheck();
+	}
+
 	UOutCheck();
+	TempCheck();
+}
+
+void ScBat::UInCheckFast()
+{
+	int uInValue = inVolt.GetInstantaneousValue();
+	//int uInOver = scData->cbPara.dischargeVoltOverW;
+
+	if (IsMaximizing(uInValue, 2050))
+	{
+		uInMaxCount.Increase();
+		if (uInMaxCount.result)
+		{
+			uInMaxFast.Encounter();
+		}
+	}
+	else
+	{
+		uInMaxCount.Reset();
+	}
+	
+	if (IsMaximizing(uInValue, 2050))
+	{
+		uInBatCount.Increase();
+		if (uInBatCount.result)
+		{
+			uInBatFast.Encounter();
+		}
+	}
+	else
+	{
+		uInBatCount.Reset();
+	}
+}
+
+void ScBat::IOutCheckFast()
+{
+	int iOutValue = batCurr.GetInstantaneousValue();
+	int iOutMax = scData->cbPara.chargeCurrOverW;
+	//int iOutMin = scData->cbPara.dischargeCurrOverW;
+	
+	if (IsMaximizing(iOutValue, iOutMax))
+	{
+		iBatMaxCount.Increase();
+		if (iBatMaxCount.result)
+		{
+			iBatMaxFast.Encounter();
+		}
+	}
+	else if (IsMaximizing(iOutValue, 2700))
+	{
+		iBatMaxCount.Increase();
+		if (iBatMaxCount.result)
+		{
+			iBatMaxFast.Encounter();
+		}
+	}
+	else
+	{
+		iBatMaxCount.Reset();
+	}
+	
+	if (IsMaximizing(-iOutValue, 2500))
+	{
+		iBatMinCount.Increase();
+		if (iBatMinCount.result)
+		{
+			iBatMinFast.Encounter();
+		}
+	}
+	else
+	{
+		iBatMinCount.Reset();
+	}
+}
+
+void ScBat::UOutCheckFast()
+{
+	int uOutValue = outVolt.GetInstantaneousValue();
+	int uOutOver = scData->cbPara.chargeVoltOverW;
+	
+	if (IsMaximizing(uOutValue, uOutOver))
+	{
+		uBatMaxCount.Increase();
+		if (uBatMaxCount.result)
+		{
+			uBatMaxFast.Encounter();
+		}
+	}
+	else if (IsMaximizing(uOutValue, 9200))
+	{
+		uBatMaxCount.Increase();
+		if (uBatMaxCount.result)
+		{
+			uBatMaxFast.Encounter();
+		}
+	}
+	else
+	{
+		uBatMaxCount.Reset();
+	}	
+}
+
+//硬件故障，fpga触发
+void ScBat::IOCheck()
+{
+	if (fpga->i_max)
+	{
+		iBatMaxHW.Encounter();
+	}
+	
+	if (fpga->u_out_max)
+	{
+		uBatMaxHW.Encounter();
+	}
+	
+	if (fpga->u_fly_max)
+	{
+		uFlyMaxHW.Encounter();
+	}
+}
+
+void ScBat::UInCheck()
+{
+	int uInValue = scData->ad.u_in;
+	//int uInOver = scData->cbPara.dischargeVoltOverW;
+	
+	bool max1 = IsMaximizing(uInValue, 1900, &uInMax1HoldTime);
+	bool max2 = IsMaximizing(uInValue, 2050, &uInMax2HoldTime);
+	
+	if (max1 || max2)
+	{
+		uInMaxSlow.Encounter();
+	}
+}
+
+void ScBat::UCflyCheck()
+{
+	int uInValue = scData->ad.u_in;
+	int uCflyValue = scData->ad.u_cfly;
+	int uCflyOver = scData->cbPara.flyingCapVoltOverW;
+	
+	bool max1 = IsMaximizing(uInValue - uCflyValue, uCflyOver, &uCFly1HoldTime);
+	bool max2 = IsMaximizing(uCflyValue, 1100, &uCFly2HoldTime);
+	bool max3 = IsMaximizing(uInValue - uCflyValue, 1300, &uCFly2HoldTime);
+	
+	if (max1 || max2 || max3)
+	{
+		uCfly.Encounter();
+	}
+}
+
+void ScBat::IOutCheck()
+{
+	int iOutValue = scData->ad.i_out;
+	int iOutMax = scData->cbPara.chargeCurrOverW;
+	int iOutMin = scData->cbPara.dischargeCurrOverW;
+	
+	bool max1 = IsMaximizing(iOutValue, iOutMax, &iBatMax1HoldTime);
+	bool max2 = IsMaximizing(iOutValue, 2700, &iBatMax2HoldTime);
+	bool max3 = IsMaximizing(-iOutValue, iOutMin, &iBatMin1HoldTime);
+	bool max4 = IsMaximizing(-iOutValue, 2700, &iBatMin2HoldTime);
+	
+	if (max1 || max2)
+	{
+		iBatMaxSlow.Encounter();
+	}
+	else if (max3 || max4)
+	{
+		iBatMinSlow.Encounter();
+	}
+}
+
+void ScBat::UOutCheck()
+{
+	int uOutValue = scData->ad.u_out;
+	int uOutOver = scData->cbPara.chargeVoltOverW;
+	
+	bool max1 = IsMaximizing(uOutValue, uOutOver, &uBatMax1HoldTime);
+	bool max2 = IsMaximizing(uOutValue, 9200, &uBatMax2HoldTime);
+	
+	if (max1 || max2)
+	{
+		uBatMaxFast.Encounter();
+	}
+}
+
+void ScBat::TempCheck()
+{
+	int temp1 = scData->ad.temp_igpt1;
+	int temp2 = scData->ad.temp_igpt2;
+	int tmep1Max = scData->cbPara.IGBT1TemprOver;
+	int tmep2Max = scData->cbPara.IGBT2TemprOver;
+	
+	bool max1 = IsMaximizing(temp1, tmep1Max, &igbt1TOver1HoldTime);
+	bool max2 = IsMaximizing(temp1, 85, &igbt1TOver2HoldTime);
+	bool max3 = IsMaximizing(temp2, tmep2Max, &igbt2TOver1HoldTime);
+	bool max4 = IsMaximizing(temp2, 85, &igbt2TOver2HoldTime);
+	
+	if (max1 || max2)
+	{
+		igbt1TempOver.Encounter();
+	}
+	
+	if (max3 || max4)
+	{
+		igbt2TempOver.Encounter();
+	}
 }
 
 void ScBat::UpdateFaultState()
@@ -414,42 +646,12 @@ void ScBat::RefreshRelay()
 	relays.Refresh();
 }
 
-void ScBat::UInCheckFast()
-{
-
-}
-
-void ScBat::IOutCheckFast()
-{
-
-}
-
-void ScBat::UOutCheckFast()
-{
-
-}
-
-void ScBat::IOCheck()
-{
-
-}
-
-void ScBat::UInCheck()
-{
-
-}
-
-void ScBat::IOutCheck()
-{
-
-}
-
-void ScBat::UOutCheck()
-{
-
-}
-
 void ScBat::SetSharedData(void * sharedData)
 {
 	this->scData = (ScData *)sharedData;
+}
+
+void ScBat::SetFpgaData(void * fpgadData)
+{
+	this->scData = (ScData *)fpgadData;
 }

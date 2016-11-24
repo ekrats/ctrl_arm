@@ -175,24 +175,27 @@ typedef union _sc_fault_t
 {
     struct 
     {
-        uint32_t in_fuse1_fail   :1;
-        uint32_t in_fuse2_fail   :1;
-        uint32_t ac1_volt_over   :1;
-        uint32_t bus_over	     :1;
+        uint32_t u_in_max_slow	  :1;
+		uint32_t u_cfly_max_slow  :1;
+		uint32_t i_bat_max_slow   :1;
+        uint32_t i_bat_min_slow   :1;
 		
-        uint32_t bus_under       :1;
-        uint32_t m1_temp_over    :1;
-        uint32_t m2_temp_over    :1;
-        uint32_t cap1_temp_over  :1;
+        uint32_t u_bat_max_slow   :1;
+		uint32_t u_in_bat_slow    :1;
+        uint32_t igbt1_temp_over  :1;
+        uint32_t igbt2_temp_over  :1;
 		
-        uint32_t cap2_temp_over  :1; 
-        uint32_t m1_curr_fail    :1;
-        uint32_t m2_curr_fail    :1;
-        uint32_t m1_curr_over    :1;
+        uint32_t i_bat_max_hw	  :1;
+		uint32_t u_fly_max_hw     :1; 
+        uint32_t u_bat_max_hw	  :1;
+        uint32_t u_in_max_fast    :1;
 		
-        uint32_t m2_curr_over    :1;
+        uint32_t i_bat_max_fast   :1;
+        uint32_t i_bat_min_fast   :1;
+        uint32_t u_bat_max_fast   :1;
+		uint32_t u_in_bat_fast	  :1;
 		
-		uint32_t res			 :19;
+		uint32_t res		  	  :16;
     }fault_bit;
 	struct
     {
@@ -270,7 +273,6 @@ typedef struct
 }canAppBuf_config;
 
 typedef struct{
-	fpga_data fpga;
 	ad_data_t	ad;
 	sc_info_t	output;
 	sc_status_t status;
