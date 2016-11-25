@@ -14,7 +14,7 @@ ScData shareData;
 CanApp can;
 Config_STYP config = Config_STYP_DEFAULT;
 
-int faultMast = 0x0000;
+int faultMast = 0x3FFFF;
 
 void ThreeLevel::Init()
 {
@@ -134,7 +134,9 @@ void ThreeLevel::StateControl()
 	{
 		this->Off();
 		faultKeepTime.Start();
-		if (faultKeepTime.GetResult() && (sys_fault != 0))
+		if (faultKeepTime.GetResult() 
+		&& (sys_fault != 0)
+		&& (sys_lock == 0))
 		{
 			scBat.ResetFaulture();
 		}
@@ -194,15 +196,15 @@ void ThreeLevel::FastCheck()
 {
 	scBat.RefreshState();
 	
-	sys_fault = scBat.GetFault();
-	sys_lock = scBat.GetLock();
+	sys_fault = (scBat.GetFault() & faultMast);
+	sys_lock = (scBat.GetLock() & faultMast);
 }
 
 void ThreeLevel::SlowCheck()
 {
 	scBat.SlowCheck();
 	
-	//CanCheck();
+	CanCheck();
 }
 
 void ThreeLevel::FanLogic()

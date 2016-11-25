@@ -387,6 +387,9 @@ void ScBat::FaultCheckModuleInit()
 	failureList.Add(&uBatMaxFast);
 	failureList.Add(&uInBatFast);
 	
+	failureList.Add(&igbt1TempFail);
+	failureList.Add(&igbt2TempFail);
+	
     relays.Register(&iBatMin1HoldTime);
 	relays.Register(&iBatMin2HoldTime);
     relays.Register(&iBatMax1HoldTime);
@@ -403,6 +406,9 @@ void ScBat::FaultCheckModuleInit()
     relays.Register(&igbt2TOver2HoldTime);
 	relays.Register(&uCFly1HoldTime);
     relays.Register(&uCFly2HoldTime);
+	
+	relays.Register(&igbt1TempFailHoldTime);
+    relays.Register(&igbt2TempFailHoldTime);
 }
 
 void ScBat::FastCheck()
@@ -421,12 +427,12 @@ void ScBat::SlowCheck()
 {
 	if (isStartEnable)
 	{
-		UInCheck();
 		IOutCheck();
 		UCflyCheck();
 	}
-
+	UInCheck();
 	UOutCheck();
+	TempFailCheck();
 	TempCheck();
 }
 
@@ -611,6 +617,25 @@ void ScBat::UOutCheck()
 	if (max1 || max2)
 	{
 		uBatMaxFast.Encounter();
+	}
+}
+
+void ScBat::TempFailCheck()
+{
+	int temp1 = scData->ad.temp_igpt1;
+	int temp2 = scData->ad.temp_igpt2;
+	
+	bool max1 = IsMinimizing(temp1, -39, &igbt1TempFailHoldTime);
+	bool max2 = IsMinimizing(temp2, -39, &igbt2TempFailHoldTime);
+	
+	if (max1)
+	{
+		igbt1TempFail.Encounter();
+	}
+	
+	if (max2)
+	{
+		igbt2TempFail.Encounter();
 	}
 }
 

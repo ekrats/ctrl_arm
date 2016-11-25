@@ -151,6 +151,9 @@ private:
 	Failure uInMaxFast;
 	Failure uInBatFast;
 
+	Failure igbt1TempFail;
+	Failure igbt2TempFail;
+
     Relay iBatMin1HoldTime;
 	Relay iBatMin2HoldTime;
     Relay iBatMax1HoldTime;
@@ -167,6 +170,9 @@ private:
 	Relay igbt2TOver2HoldTime;
 	Relay uCFly1HoldTime;
 	Relay uCFly2HoldTime;
+	
+	Relay igbt1TempFailHoldTime;
+	Relay igbt2TempFailHoldTime;
 	
 	Counter iBatMinCount;
 	Counter iBatMaxCount;
@@ -227,6 +233,7 @@ private:
 	void UOutCheck();
 	void UCflyCheck();
 	void TempCheck();
+	void TempFailCheck();
 
 private:
 	bool isConstP;

@@ -94,8 +94,8 @@ static void call_back(void * buffer, int length)
 		  num = map[map_index].current_id;
 		}
 
-		usart_tx_data[1] = num >> 8;
-		usart_tx_data[2] = num;
+		usart_tx_data[1] = num;
+		usart_tx_data[2] = num >> 8;
 		tx_length = 2;
     }
     break;
