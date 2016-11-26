@@ -38,7 +38,7 @@ static void iap_service_thread_entry(void* parameter)
                 }
                 else
                 {
-                    ((void(*)(int))(*(uint32_t *)msg->data))(0x80);
+                    ((void(*)(int))(*(uint32_t *)msg->data))(0x81);
                 }
                 break;
             case IAP_CMD_SET_INFO:

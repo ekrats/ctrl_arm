@@ -67,9 +67,23 @@ void ThreeLevel::RefreshCanData()
 	scData->cbStatus.gridCapvoltW = scData->ad.u_in;
 	scData->cbStatus.igbt1Tempr = scData->ad.temp_igpt1;
 	scData->cbStatus.igbt2Tempr = scData->ad.temp_igpt2;
-	scData->cbStatus.flags.chargeOnN = IsRun();
-	scData->cbStatus.flags.floatChargeN = scBat.IsOutputSteady();
-//	scData->cbStatus.flags.
+	scData->cbStatus.flags.sysFailN = sys_fault > 0;
+	scData->cbStatus.flags.chargeOnN = (isStartEnable && (startMode == 1));
+	scData->cbStatus.flags.floatChargeN = scBat.IsOutputSteady() && (startMode == 1);
+	scData->cbStatus.flags.dischargeOnN = (isStartEnable && (startMode == 2));
+	scData->cbStatus.flags.fanOnN = (fanState > 0);
+	scData->cbStatus.flags.floatDischargeN = scBat.IsOutputSteady() && (startMode == 2);
+	scData->cbStatus.flags.flyCapBalanceN = scData->output.fault.fault_bit.u_cfly_max_slow || scData->output.fault.fault_bit.u_fly_max_hw;
+	scData->cbStatus.flags.hwCapOverVoltN = scData->output.fault.fault_bit.u_bat_max_hw;
+	scData->cbStatus.flags.hwOverCurrN = scData->output.fault.fault_bit.i_bat_max_hw;
+	scData->cbStatus.flags.igbt1OverTemprN = scData->output.fault.fault_bit.igbt1_temp_over;
+	scData->cbStatus.flags.igbt2OverTemprN = scData->output.fault.fault_bit.igbt2_temp_over;
+	scData->cbStatus.flags.swCapOverVoltN = scData->output.fault.fault_bit.u_bat_max_fast
+										|| scData->output.fault.fault_bit.u_bat_max_slow;
+	scData->cbStatus.flags.swGridOverVoltN = scData->output.fault.fault_bit.u_in_max_fast
+										|| scData->output.fault.fault_bit.u_in_max_slow;
+	scData->cbStatus.flags.swOverCurrN = scData->output.fault.fault_bit.i_bat_max_fast
+										|| scData->output.fault.fault_bit.i_bat_max_slow;					
 }
 
 int i_control = 250;
@@ -113,11 +127,7 @@ void ThreeLevel::StateControl()
 	
 	RefreshLocalData();
 	
-	RefreshCanData();
-	
 	SlowCheck();
-	
-	FanLogic();
 	
 	RefreshRelay();
 	
@@ -128,19 +138,36 @@ void ThreeLevel::StateControl()
 	  && ctrlOrd == startMode)
 	{
 		this->On();
+		if (startMode == 1)
+		{
+			scBat.SetIOutTarget(scData->cbPara.chargeCurrW);
+			scBat.SetUOutTarget(scData->cbPara.chargeVoltW);
+		}
+		else if (startMode == 2)
+		{
+			scBat.SetIOutTarget(scData->cbPara.dischargeCurrW);
+			scBat.SetUOutTarget(scData->cbPara.dischargeVoltW);
+		}
 		faultKeepTime.Stop();
+		fpga.unlock = false;
 	}
 	else
 	{
 		this->Off();
 		faultKeepTime.Start();
 		if (faultKeepTime.GetResult() 
-		&& (sys_fault != 0)
-		&& (sys_lock == 0))
+			&& (sys_fault != 0)
+			&& (sys_lock == 0))
 		{
 			scBat.ResetFaulture();
+			faultKeepTime.Reset();
+			fpga.unlock = true;
 		}
 	}
+	
+	RefreshCanData();
+	
+	FanLogic();
 	
 	if (ctrlOrd == 1)
 	{
@@ -168,8 +195,6 @@ void ThreeLevel::On()
 	if (restartTime.GetResult())
 	{
 		Product::On();
-		scBat.SetIOutTarget(scData->cbPara.chargeCurrW);
-		scBat.SetUOutTarget(scData->cbPara.chargeVoltW);
 		scBat.On();
 	}
 }

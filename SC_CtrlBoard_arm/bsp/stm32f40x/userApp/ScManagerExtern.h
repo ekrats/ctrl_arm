@@ -23,8 +23,8 @@ void * GetShareDataPtr(void);
 void gbch_init(void);
 void can_led(void);
 void can_fault(void);
+void iap_send(int state_code);
 void SendCan(uint8_t frame);					//CANÅ¼·¢Ö¡·¢ËÍº¯Êý
-void iap_send(uint8_t frame, uint16_t lenth);
 void check_file_call_back(int state_code);
 void CanApp_TriggerStream_Server(void);
 void Bsp_can_send_trigger_event(void);

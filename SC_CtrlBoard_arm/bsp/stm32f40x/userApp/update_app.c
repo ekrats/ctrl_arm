@@ -14,6 +14,7 @@
 #include "update_app.h"
 #include "hardware_crc32.h"
 #include "own_flash.h"
+#include "ScManagerExtern.h"
 
 static APPLICATION_UPDATE_INFO new_app_info = { 0 };
 static int file_length = 0;
@@ -33,7 +34,12 @@ uint32_t start_update(uint8_t * buffer, int length)
         own_flash_erase(app_info_address, APPLICATION_OFFSET + new_app_info.app_size);
         own_flash_write((uint32_t *)app_info_address, (uint32_t *)&new_app_info, sizeof(APPLICATION_UPDATE_INFO) / 4);
         rtn = 0;
+		iap_send(0x0);
     }
+	else
+	{
+		iap_send(0x81);
+	}
     file_length = 0;
     rt_free(tmp);
     return rtn;
@@ -53,6 +59,7 @@ uint32_t set_file_buffer(uint8_t * buffer, int length)
         if(own_flash_write((uint32_t *)(app_start_address + file_length),  (uint32_t *)tmp, data_length / 4) == 0)
         {
             rtn =  0;
+			iap_send(0x0);
         }
         else
         {
@@ -60,6 +67,10 @@ uint32_t set_file_buffer(uint8_t * buffer, int length)
         }
         file_length += data_length;
     }
+	else
+	{
+		iap_send(0x81);
+	}
     rt_free(tmp);
     return rtn;
 }

@@ -34,7 +34,6 @@ void check_file_call_back(int state_code)
     mem_printf((char*)protocol.tx_buffer, tx_length);
 }
 
-int iap_index = 0;
 u8 fault1_buff[21];
 u8 fault2_buff[257];
 u8 fault3_buff[257];
@@ -50,24 +49,69 @@ static void call_back(void * buffer, int length)
 	case 0xD0://调试指令
         usart_tx_data[0] = 0x00;
         tx_length = 0;	//无返回数据（不包括状态字节）
-		if (data[1] == 1)
-		{
-			//监控板更新程序
-			iap_index = 1;
-		}
-		else if (data[1] == 2)
-		{
-			iap_index = 2;
-		}
         break;
-		
+	//状态数据
 	case 0xc0:
-		usart_tx_data[1] = 1;
-		tx_length = 1;
+		{
+			int state_size = sizeof(CAN_CB_Status_STYP);
+			rt_uint8_t * state_buff;
+			rt_memcpy(&state_buff[1], (rt_uint8_t *)&p->cbStatus, state_size);
+			length = protocol.get_output_data(&protocol, &state_buff[0], state_size+1);
+			mem_printf((const char *)protocol.tx_buffer, length);
+		}
+		return;
+		
+	//充电参数
+	case 0xc1:
+		{
+			int par_size = sizeof(CB_Para_STYP);
+			rt_uint8_t * par_buff;
+			rt_memcpy(&par_buff[1], (rt_uint8_t *)&p->cbPara, par_size);
+			length = protocol.get_output_data(&protocol, &par_buff[0], par_size+1);
+			mem_printf((const char *)protocol.tx_buffer, length);
+		}
+		return;
+		
+	//AD参数
+	case 0xc2:
+		{
+			int ad_size = sizeof(CB_Adjust_STYP);
+			rt_uint8_t * ad_buff;
+			rt_memcpy(&ad_buff[1], (rt_uint8_t *)&p->cbAdj, ad_size);
+			length = protocol.get_output_data(&protocol, &ad_buff[0], ad_size+1);
+			mem_printf((const char *)protocol.tx_buffer, length);
+		}
+		return;
+		
+	//系统参数设置
+	case 0xc3:
+		{
+			rt_memcpy(&p->cbWrPara, &data[4], sizeof(CB_Para_STYP));
+			if (rt_memcmp((const void *)&p->cbWrPara, (const void *)&p->cbPara, sizeof(CB_Para_STYP)))
+			{
+				p->cbPara = p->cbWrPara;
+				p->status.status_bit.wParFlag  = true;
+			}
+		}
+		usart_tx_data[0] = 0x00;
+        tx_length = 0;	//无返回数据（不包括状态字节）
+		break;
+		
+	//AD校准参数设置
+	case 0xc4:
+		{
+			rt_memcpy(&p->cbWrAdj, &data[4], sizeof(CB_Adjust_STYP));
+			if (rt_memcmp((const void *)&p->cbWrAdj, (const void *)&p->cbAdj, sizeof(CB_Adjust_STYP)))
+			{
+				p->cbAdj = p->cbWrAdj;
+				p->status.status_bit.wAdjFlag  = true;
+			}
+		}
+		usart_tx_data[0] = 0x00;
+        tx_length = 0;	//无返回数据（不包括状态字节）
 		break;
 		
     case 0xcc:
-		if (iap_index == 1)
 		{
 			extern struct rt_semaphore sem_reset_cpu;
             iap_message * msg = (iap_message *)rt_malloc(sizeof(iap_message));
@@ -78,10 +122,6 @@ static void call_back(void * buffer, int length)
             file_write_index = 0;
             rt_mb_send((rt_mailbox_t)get_iap_mailbox(), (rt_uint32_t)msg);
 		}
-		else if (iap_index == 2)
-        {
-			iap_send(IAP_CMD_CHECK_FILE, 7);
-        }
 		return;
 
 	case 0xd1://读取故障记录的总数
@@ -131,7 +171,6 @@ static void call_back(void * buffer, int length)
 			fault2_buff[0] = 0x00;
 			length = protocol.get_output_data(&protocol, &fault2_buff[0], 257);
 			mem_printf((const char *)protocol.tx_buffer, length);
-			
 		}
 		else if (rx_index == 3)
 		{
@@ -156,7 +195,6 @@ static void call_back(void * buffer, int length)
 	}
 		
     case 'u':
-		if (iap_index == 1)
 		{
 			iap_message * msg = (iap_message *)rt_malloc(sizeof(iap_message));
             msg->cmd = IAP_CMD_SET_INFO;
@@ -168,16 +206,8 @@ static void call_back(void * buffer, int length)
             rt_mb_send((rt_mailbox_t)get_iap_mailbox(), (rt_uint32_t)msg);
 			break;
 		}
-		else if (iap_index == 2)
-        {
-			p->canAppBuf.iap_index = 0;
-			rt_memcpy(p->canAppBuf.iap_info, (uint8_t *)data + 2, length - 2);
-			iap_send(IAP_CMD_SET_INFO, length - 2);
-			return;
-        }
 
     case 'f':
-		if (iap_index == 1)
 		{
 			rx_file_index = (data[2] + (data[3] << 8));
 			if (rx_file_index == file_write_index)
@@ -200,26 +230,6 @@ static void call_back(void * buffer, int length)
 			}
 			tx_length = 0;
 			break;
-		}
-		else if (iap_index == 2)
-		{
-			rx_file_index = (data[2] + (data[3] << 8));
-			if (rx_file_index == (p->canAppBuf.iap_index-1))
-			{
-				usart_tx_data[0] = 0x00;
-				rt_memcpy(p->canAppBuf.iap_file, (uint8_t *)data + 2, length - 2);
-				iap_send(IAP_CMD_WRITE_FILE, length - 2);
-			}
-			else if (rx_file_index < (p->canAppBuf.iap_index-1))
-			{
-				usart_tx_data[0] = 0x0;
-			}
-			else
-			{
-				usart_tx_data[0] = 0x81;
-			}
-			tx_length = 0;
-			return;
 		}
 
     default://其它情况，不响应，直接返回

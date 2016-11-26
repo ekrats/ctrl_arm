@@ -8,6 +8,8 @@
 #include "ScManagerExtern.h"
 #include "ThreeLevel.h"
 #include "DataStruct.h"
+#include "iap_service.h"
+#include "serial_util.h"
 
 extern CanApp can;
 extern ScData shareData;
@@ -79,6 +81,96 @@ void CanApp::Init(void)
 	}
 	
 	_std_msg[1].Dest = can.mxcx_id;
+}
+
+void iap_send(int state_code)
+{
+	shareData.canAppBuf.iap_reply[0] = state_code;
+	SendCan(13);
+}
+
+void CanApp::IapRx_Deal(CAN_RX_DATA_RAM* _p, EXTID_UTYP* _tRecId, uint8_t frame)
+{
+	static uint16_t DataLen[CAN_STD_FRAME_NUM] = {0};
+	static uint16_t RxIndex;
+	static uint16_t file_cnt;
+	//------------------------------------------------------------------
+	// 收到首帧
+	//------------------------------------------------------------------
+	if(_tRecId->st.packetID == 0)  
+	{
+		DataLen[frame] = 0;
+		if (can._std_msg[frame].FuncID == CAN_FUNC_IAP_WRITE)
+			RxIndex = can.CanBuf.iap_file[0] + (can.CanBuf.iap_file[1] << 8);
+	}
+	//------------------------------------------------------------------
+	// 接收数据
+	//------------------------------------------------------------------
+	memcpy((uint8_t*)(can._std_msg[frame].CanBuffData + _tRecId->st.packetID * 8),
+		_p->data.Data,
+		_p->data.DLC);
+	//------------------------------------------------------------------
+	// 统计收到帧长
+	//------------------------------------------------------------------
+	DataLen[frame] += _p->data.DLC;
+	//------------------------------------------------------------------
+	// 收到尾帧
+	//------------------------------------------------------------------
+	if(_tRecId->st.lastFrame == 1)
+	{
+		//----------------------------------------------------------------
+		// 更新数据
+		//----------------------------------------------------------------
+		switch (can._std_msg[frame].FuncID)
+		{
+			case CAN_FUNC_IAP_INFO:
+				{
+					iap_message * msg = (iap_message *)rt_malloc(sizeof(iap_message));
+					file_cnt = 0;
+					msg->cmd = IAP_CMD_SET_INFO;
+					msg->length = 16;
+					rt_memcpy(msg->data, (uint8_t *)can.CanBuf.iap_info, 16);
+					shareData.canAppBuf.iap_reply[1] = file_cnt;
+					shareData.canAppBuf.iap_reply[2] = file_cnt >> 8;
+					rt_mb_send((rt_mailbox_t)get_iap_mailbox(), (rt_uint32_t)msg);
+				}
+				break;
+			case CAN_FUNC_IAP_WRITE:
+				{
+					if ((can.CanBuf.iap_file[DataLen[frame]-1] == DataLen[frame])
+						&& (RxIndex == file_cnt))
+					{
+						iap_message * msg = (iap_message *)rt_malloc(sizeof(iap_message));
+						file_cnt ++;
+						msg->length = DataLen[frame]-3;
+						memcpy(msg->data, (uint8_t *)can.CanBuf.iap_file + 2, DataLen[frame]-3);
+						rt_memset(can.CanBuf.iap_file, 0, 0xff);
+						shareData.canAppBuf.iap_reply[1] = file_cnt;
+						shareData.canAppBuf.iap_reply[2] = file_cnt >> 8;
+						rt_mb_send((rt_mailbox_t)get_iap_mailbox(), (rt_uint32_t)msg);
+					}
+				}
+				break;
+			case CAN_FUNC_IAP_CHECK:
+				{
+					extern struct rt_semaphore sem_reset_cpu;
+					iap_message * msg = (iap_message *)rt_malloc(sizeof(iap_message));
+					file_cnt ++;
+					msg->cmd = IAP_CMD_CHECK_FILE;
+					msg->length = 0;
+					*(u32*)&msg->data = (u32)iap_send;
+					*(u32*)&msg->data[4] = (u32)&sem_reset_cpu;
+					shareData.canAppBuf.iap_reply[1] = file_cnt;
+					shareData.canAppBuf.iap_reply[2] = file_cnt >> 8;
+					rt_mb_send((rt_mailbox_t)get_iap_mailbox(), (rt_uint32_t)msg);
+				}
+				break;
+		}
+		//----------------------------------------------------------------
+		// 清0帧长
+		//----------------------------------------------------------------
+		DataLen[frame] = 0;
+	}
 }
 
 void CanApp::MsgRx_Deal(CAN_RX_DATA_RAM* _p, EXTID_UTYP* _tRecId, uint8_t frame)
@@ -421,13 +513,6 @@ void SendCan(uint8_t frame)
 		can.TriggerMsgUpdate_data(frame);
 		Bsp_can_send_trigger_event();
 	}
-}
-
-void iap_send(uint8_t frame, uint16_t lenth)
-{
-	_std_msg_table[frame].len = lenth+1;
-	_std_msg_table[frame].AppBuffData[lenth] = lenth + 1;
-	SendCan(frame);
 }
 
 void gbch_init(void)

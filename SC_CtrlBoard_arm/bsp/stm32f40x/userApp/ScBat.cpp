@@ -36,7 +36,6 @@ void ScBat::RefreshState()
 
 void ScBat::On()
 {
-	uOutFilt = outVolt.GetAverageRealValue();
 	int iTemp;
 	
 	if (!isStartEnable)
@@ -47,6 +46,7 @@ void ScBat::On()
 	
 	if (isConstP)
 	{
+		uOutFilt = outVolt.GetAverageRealValue();
 		if (uOutFilt < 1000)
 		{
 			iTemp = iTarget;
