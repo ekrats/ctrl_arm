@@ -23,10 +23,10 @@ enum SC_START_MODE
     SC_START_DISCHARGE,
 };
 
-class ScBat : public Product, public FailureCheck
+class Bat : public Product, public FailureCheck
 {
 public:
-	ScBat()
+	Bat()
 	{
 		pidVoltage.proportionalGain = 150;
 		pidVoltage.integralGain = 2;
@@ -85,7 +85,9 @@ public:
 
 private:
 	ScData * scData;
-	fpga_data * fpga;
+
+public:
+	fpga_data fpga;
 
 public:
 	void Init();
@@ -103,7 +105,6 @@ public:
     virtual void RefreshRelay();
 	inline  void StartMode(SC_START_MODE mode ) { startMode = mode ;};
 	inline  void ConstPowerMode(bool mode ) { isConstP = mode ;};
-	void SetFpgaData(void * fpgadData);
 	bool IsOutputSteady(){ return isSteady;}
 	
 	void SetUOutTarget(int value)

@@ -408,9 +408,9 @@
               <FilePath>..\..\bsp\stm32f40x\userApp\ThreeLevel.cpp</FilePath>
             </File>
             <File>
-              <FileName>ScBat.cpp</FileName>
+              <FileName>Bat.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\bsp\stm32f40x\userApp\ScBat.cpp</FilePath>
+              <FilePath>..\..\bsp\stm32f40x\userApp\Bat.cpp</FilePath>
             </File>
             <File>
               <FileName>canApp.cpp</FileName>

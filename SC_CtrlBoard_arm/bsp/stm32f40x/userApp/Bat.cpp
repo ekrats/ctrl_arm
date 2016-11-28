@@ -1,10 +1,11 @@
-#include "ScBat.h"
+#include "Bat.h"
 #include "api.h"
 #include "ad.h"
 
-void ScBat::Init()
+static int adc_buffer[10];
+void Bat::Init()
 {
-	int * ad_buffer = get_ad_data_buffer();
+	//int * ad_buffer = get_ad_data_buffer();
 	
 	sensorList.Add(&inVolt);
 	sensorList.Add(&cFlyVolt);
@@ -12,17 +13,17 @@ void ScBat::Init()
 	sensorList.Add(&batCurr);
 	sensorList.Add(&iOutPeak);
 	
-	inVolt.Init(&ad_buffer[u_in_index], 13533, 95);
-	cFlyVolt.Init(&ad_buffer[u_cfly_index], 13533, 80);
-	outVolt.Init(&ad_buffer[u_out_index], 13533, 95);
-	batCurr.Init(&ad_buffer[i_out_index], 4500, 95);
-	iOutPeak.Init(&ad_buffer[i_out_peak_index], 4500, 95);
-	igbt1Temp.Init(&ad_buffer[temp1_index], 0, 5);
-	igbt2Temp.Init(&ad_buffer[temp2_index], 0, 5);
+	inVolt.Init(&adc_buffer[u_in_index], 13533, 95);
+	cFlyVolt.Init(&adc_buffer[u_cfly_index], 13533, 80);
+	outVolt.Init(&adc_buffer[u_out_index], 13533, 95);
+	batCurr.Init(&adc_buffer[i_out_index], 4500, 95);
+	iOutPeak.Init(&adc_buffer[i_out_peak_index], 4500, 95);
+	igbt1Temp.Init(&adc_buffer[temp1_index], 0, 5);
+	igbt2Temp.Init(&adc_buffer[temp2_index], 0, 5);
 	
 }
 
-void ScBat::RefreshState()
+void Bat::RefreshState()
 {
 	Product::RefreshTransducerData(sensorList);
 	
@@ -34,7 +35,7 @@ void ScBat::RefreshState()
 	UpdateFaultState();
 }
 
-void ScBat::On()
+void Bat::On()
 {
 	int iTemp;
 	
@@ -92,7 +93,7 @@ void ScBat::On()
 	
 }
 
-void ScBat::Off()
+void Bat::Off()
 {
 	if (isStartEnable)
 	{
@@ -109,11 +110,13 @@ void ScBat::Off()
 		pidCfly.Reset();
 		relays.Reset();
 	}
-	uReference = outVolt.GetIRealValue();
+	fpga.duty1 = 0;
+	fpga.duty2 = 0;
 	
+	fpga.enable = isStartEnable;
 }
 
-void ScBat::Run()
+void Bat::Run()
 {
 	if (!isStartEnable)
 	{
@@ -132,6 +135,11 @@ void ScBat::Run()
 			break;
 	}
 	
+	fpga.duty1 = duty1;
+	fpga.duty2 = duty2;
+	
+	fpga.enable = isStartEnable;
+	
 }
 
 int lastUIn;
@@ -142,7 +150,7 @@ int highRate = 55;
 int lowVolt = 0;
 int highVolt = 0;
 
-void ScBat::ChargeCtrl()
+void Bat::ChargeCtrl()
 {
 	int iBat = 0;
 	int uOut = 0;
@@ -291,7 +299,7 @@ void ScBat::ChargeCtrl()
 	}
 }
 
-void ScBat::DisChargeCtrl()
+void Bat::DisChargeCtrl()
 {
 	int iBat = 0;
 	int uIn = 0;
@@ -367,7 +375,7 @@ void ScBat::DisChargeCtrl()
 	}
 }
 
-void ScBat::FaultCheckModuleInit()
+void Bat::FaultCheckModuleInit()
 {
 	failureList.Add(&uInMaxSlow);
 	failureList.Add(&uCfly);
@@ -411,7 +419,7 @@ void ScBat::FaultCheckModuleInit()
     relays.Register(&igbt2TempFailHoldTime);
 }
 
-void ScBat::FastCheck()
+void Bat::FastCheck()
 {
 	if (!isStartEnable)
 	{
@@ -423,7 +431,7 @@ void ScBat::FastCheck()
 	IOCheck();
 }
 
-void ScBat::SlowCheck()
+void Bat::SlowCheck()
 {
 	if (isStartEnable)
 	{
@@ -431,12 +439,12 @@ void ScBat::SlowCheck()
 		UCflyCheck();
 	}
 	UInCheck();
-	UOutCheck();
+	//UOutCheck();
 	TempFailCheck();
 	TempCheck();
 }
 
-void ScBat::UInCheckFast()
+void Bat::UInCheckFast()
 {
 	int uInValue = inVolt.GetInstantaneousValue();
 	//int uInOver = scData->cbPara.dischargeVoltOverW;
@@ -468,7 +476,7 @@ void ScBat::UInCheckFast()
 	}
 }
 
-void ScBat::IOutCheckFast()
+void Bat::IOutCheckFast()
 {
 	int iOutValue = batCurr.GetInstantaneousValue();
 	int iOutMax = scData->cbPara.chargeCurrOverW;
@@ -509,7 +517,7 @@ void ScBat::IOutCheckFast()
 	}
 }
 
-void ScBat::UOutCheckFast()
+void Bat::UOutCheckFast()
 {
 	int uOutValue = outVolt.GetInstantaneousValue();
 	int uOutOver = scData->cbPara.chargeVoltOverW;
@@ -537,25 +545,25 @@ void ScBat::UOutCheckFast()
 }
 
 //Ó²¼þ¹ÊÕÏ£¬fpga´¥·¢
-void ScBat::IOCheck()
+void Bat::IOCheck()
 {
-	if (fpga->i_max)
+	if (fpga.i_max)
 	{
 		iBatMaxHW.Encounter();
 	}
 	
-	if (fpga->u_out_max)
+	if (fpga.u_out_max)
 	{
 		uBatMaxHW.Encounter();
 	}
 	
-	if (fpga->u_fly_max)
+	if (fpga.u_fly_max)
 	{
 		uFlyMaxHW.Encounter();
 	}
 }
 
-void ScBat::UInCheck()
+void Bat::UInCheck()
 {
 	int uInValue = scData->ad.u_in;
 	//int uInOver = scData->cbPara.dischargeVoltOverW;
@@ -569,7 +577,7 @@ void ScBat::UInCheck()
 	}
 }
 
-void ScBat::UCflyCheck()
+void Bat::UCflyCheck()
 {
 	int uInValue = scData->ad.u_in;
 	int uCflyValue = scData->ad.u_cfly;
@@ -585,7 +593,7 @@ void ScBat::UCflyCheck()
 	}
 }
 
-void ScBat::IOutCheck()
+void Bat::IOutCheck()
 {
 	int iOutValue = scData->ad.i_out;
 	int iOutMax = scData->cbPara.chargeCurrOverW;
@@ -606,7 +614,7 @@ void ScBat::IOutCheck()
 	}
 }
 
-void ScBat::UOutCheck()
+void Bat::UOutCheck()
 {
 	int uOutValue = scData->ad.u_out;
 	int uOutOver = scData->cbPara.chargeVoltOverW;
@@ -620,7 +628,7 @@ void ScBat::UOutCheck()
 	}
 }
 
-void ScBat::TempFailCheck()
+void Bat::TempFailCheck()
 {
 	int temp1 = scData->ad.temp_igpt1;
 	int temp2 = scData->ad.temp_igpt2;
@@ -639,7 +647,7 @@ void ScBat::TempFailCheck()
 	}
 }
 
-void ScBat::TempCheck()
+void Bat::TempCheck()
 {
 	int temp1 = scData->ad.temp_igpt1;
 	int temp2 = scData->ad.temp_igpt2;
@@ -662,22 +670,17 @@ void ScBat::TempCheck()
 	}
 }
 
-void ScBat::UpdateFaultState()
+void Bat::UpdateFaultState()
 {
 	FailureCheck::UpdateFaultState();
 }
 
-void ScBat::RefreshRelay()
+void Bat::RefreshRelay()
 {
 	relays.Refresh();
 }
 
-void ScBat::SetSharedData(void * sharedData)
+void Bat::SetSharedData(void * sharedData)
 {
 	this->scData = (ScData *)sharedData;
-}
-
-void ScBat::SetFpgaData(void * fpgadData)
-{
-	this->scData = (ScData *)fpgadData;
 }

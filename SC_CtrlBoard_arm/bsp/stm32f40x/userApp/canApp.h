@@ -5,7 +5,6 @@
 #include <rtthread.h>
 #include "DataStruct.h"
 #include "can_app_def.h"
-#include "sc.h"
 
 class CanApp {
 private:

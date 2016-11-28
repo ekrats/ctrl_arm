@@ -236,6 +236,8 @@ typedef union _sc_status_t
 typedef struct _sc_data_t_{
 	int chargeCnt;
 	int faultCnt;
+	int duty1;
+	int duty2;
 }sc_data_t;
 
 typedef struct{

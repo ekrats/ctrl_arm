@@ -50,8 +50,48 @@ static void call_back(void * buffer, int length)
         usart_tx_data[0] = 0x00;
         tx_length = 0;	//无返回数据（不包括状态字节）
         break;
+	//充电指令
+	case 0xE1:
+		{
+			int cmd = data[3] + (data[4] << 8);
+			if (cmd == 1)
+			{
+				p->canAppBuf.dcdcCmd.ord = 1;
+			}
+			else
+			{
+				p->canAppBuf.dcdcCmd.ord = 0;
+			}
+			usart_tx_data[0] = 0x00;
+			usart_tx_data[1] = 0xE1;
+			tx_length = 1;	//无返回数据（不包括状态字节）
+			break;
+		}
+	//放电指令
+	case 0xE2:
+		{
+			int cmd = data[3] + (data[4] << 8);
+			if (cmd == 1)
+			{
+				p->canAppBuf.dcdcCmd.ord = 2;
+			}
+			else
+			{
+				p->canAppBuf.dcdcCmd.ord = 0;
+			}
+			usart_tx_data[0] = 0x00;
+			usart_tx_data[1] = 0xE2;
+			tx_length = 1;	//无返回数据（不包括状态字节）
+			break;
+		}
+	//重起指令
+	case 0xE3:
+		p->canAppBuf.dcdcCmd.ord = 0;
+		rt_thread_delay(RT_TICK_PER_SECOND/8);
+		NVIC_SystemReset();
+		return;
 	//状态数据
-	case 0xc0:
+	case 0xc1:
 		{
 			int state_size = sizeof(CAN_CB_Status_STYP);
 			rt_uint8_t * state_buff;
@@ -62,7 +102,7 @@ static void call_back(void * buffer, int length)
 		return;
 		
 	//充电参数
-	case 0xc1:
+	case 0xc2:
 		{
 			int par_size = sizeof(CB_Para_STYP);
 			rt_uint8_t * par_buff;
@@ -73,7 +113,7 @@ static void call_back(void * buffer, int length)
 		return;
 		
 	//AD参数
-	case 0xc2:
+	case 0xc3:
 		{
 			int ad_size = sizeof(CB_Adjust_STYP);
 			rt_uint8_t * ad_buff;
@@ -84,7 +124,7 @@ static void call_back(void * buffer, int length)
 		return;
 		
 	//系统参数设置
-	case 0xc3:
+	case 0xA0:
 		{
 			rt_memcpy(&p->cbWrPara, &data[4], sizeof(CB_Para_STYP));
 			if (rt_memcmp((const void *)&p->cbWrPara, (const void *)&p->cbPara, sizeof(CB_Para_STYP)))
@@ -98,7 +138,7 @@ static void call_back(void * buffer, int length)
 		break;
 		
 	//AD校准参数设置
-	case 0xc4:
+	case 0xA1:
 		{
 			rt_memcpy(&p->cbWrAdj, &data[4], sizeof(CB_Adjust_STYP));
 			if (rt_memcmp((const void *)&p->cbWrAdj, (const void *)&p->cbAdj, sizeof(CB_Adjust_STYP)))

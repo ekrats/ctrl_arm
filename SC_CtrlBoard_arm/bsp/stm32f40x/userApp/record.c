@@ -63,10 +63,10 @@ void push_ad_record(void)
     sc_fault->ad_origine[1][index] = (int16_t)ad_data_buf[1];
     sc_fault->ad_origine[2][index] = (int16_t)ad_data_buf[2];
     sc_fault->ad_origine[3][index] = (int16_t)ad_data_buf[3];
-    sc_fault->ad_origine[4][index] = (int16_t)ad_data_buf[4];
-    sc_fault->ad_origine[5][index] = (int16_t)ad_data_buf[5];
-    sc_fault->ad_origine[6][index] = 0;
-    sc_fault->ad_origine[7][index] = 0;
+    sc_fault->ad_origine[4][index] = (int16_t)ad_data_buf[5];
+    sc_fault->ad_origine[5][index] = (int16_t)ad_data_buf[6];
+    sc_fault->ad_origine[6][index] = shareData.output.data.duty1;
+    sc_fault->ad_origine[7][index] = shareData.output.data.duty2;
 
     ++sc_record->record_index;
     if (sc_record->record_index >= sc_record->carrier_ratio)

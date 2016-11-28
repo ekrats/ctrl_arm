@@ -6,7 +6,7 @@
 #include "OnOff.h"
 #include "NTC.h"
 #include "DCTransducer.h"
-#include "ScBat.h"
+#include "Bat.h"
 #include "Product.h"
 #include "support.h"
 #include "DataStruct.h"
@@ -45,10 +45,9 @@ public:
 	
 public:
 	ScData * scData;
-	fpga_data fpga;
 		
 private:
-	ScBat scBat;
+	Bat bat;
 
 private:
 	Relay faultKeepTime;

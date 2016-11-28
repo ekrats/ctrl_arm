@@ -14,17 +14,15 @@ ScData shareData;
 CanApp can;
 Config_STYP config = Config_STYP_DEFAULT;
 
-int faultMast = 0x3FFFF;
+int faultMast = 0xFFFF;
 
 void ThreeLevel::Init()
 {
-	scBat.Init();
+	bat.Init();
 	
-	scBat.FaultCheckModuleInit();
+	bat.FaultCheckModuleInit();
 	
-	scBat.SetFpgaData(&tl.fpga);
-	
-	scBat.SetSharedData(&shareData);
+	bat.SetSharedData(&shareData);
 	
 	SetSharedData(&shareData);
 }
@@ -48,19 +46,22 @@ void state_entry(void)
 
 void ThreeLevel::RefreshLocalData()
 {
-	scData->ad.i_out = scBat.batCurr.GetAverageRealValue();
-	scData->ad.i_peak = scBat.iOutPeak.GetAverageRealValue();
-	scData->ad.u_in = scBat.inVolt.GetAverageRealValue();
-	scData->ad.u_cfly = scBat.cFlyVolt.GetAverageRealValue();
-	scData->ad.u_out = scBat.outVolt.GetAverageRealValue();
+	scData->ad.i_out = bat.batCurr.GetAverageRealValue();
+	scData->ad.i_peak = bat.iOutPeak.GetAverageRealValue();
+	scData->ad.u_in = bat.inVolt.GetAverageRealValue();
+	scData->ad.u_cfly = bat.cFlyVolt.GetAverageRealValue();
+	scData->ad.u_out = bat.outVolt.GetAverageRealValue();
 	
-	scData->ad.temp_igpt1 = scBat.igbt1Temp.GetRealValue();
-	scData->ad.temp_igpt2 = scBat.igbt2Temp.GetRealValue();
+	scData->ad.temp_igpt1 = bat.igbt1Temp.GetRealValue();
+	scData->ad.temp_igpt2 = bat.igbt2Temp.GetRealValue();
 }
 
 void ThreeLevel::RefreshCanData()
 {
 	scData->output.fault.fault_u32 = this->sys_fault;
+	scData->output.warn.warn_u32 = (bat.GetFault() >> 16);
+	scData->output.data.duty1 = this->duty1;
+	scData->output.data.duty2 = this->duty2;
 	scData->cbStatus.capvoltW = scData->ad.u_out;
 	scData->cbStatus.currW = scData->ad.i_out;
 	scData->cbStatus.flyingCapvoltW = scData->ad.u_cfly;
@@ -69,10 +70,10 @@ void ThreeLevel::RefreshCanData()
 	scData->cbStatus.igbt2Tempr = scData->ad.temp_igpt2;
 	scData->cbStatus.flags.sysFailN = sys_fault > 0;
 	scData->cbStatus.flags.chargeOnN = (isStartEnable && (startMode == 1));
-	scData->cbStatus.flags.floatChargeN = scBat.IsOutputSteady() && (startMode == 1);
+	scData->cbStatus.flags.floatChargeN = bat.IsOutputSteady() && (startMode == 1);
 	scData->cbStatus.flags.dischargeOnN = (isStartEnable && (startMode == 2));
 	scData->cbStatus.flags.fanOnN = (fanState > 0);
-	scData->cbStatus.flags.floatDischargeN = scBat.IsOutputSteady() && (startMode == 2);
+	scData->cbStatus.flags.floatDischargeN = bat.IsOutputSteady() && (startMode == 2);
 	scData->cbStatus.flags.flyCapBalanceN = scData->output.fault.fault_bit.u_cfly_max_slow || scData->output.fault.fault_bit.u_fly_max_hw;
 	scData->cbStatus.flags.hwCapOverVoltN = scData->output.fault.fault_bit.u_bat_max_hw;
 	scData->cbStatus.flags.hwOverCurrN = scData->output.fault.fault_bit.i_bat_max_hw;
@@ -103,22 +104,9 @@ void ThreeLevel::BatControl()
 	
 	this->Run();
 	
-	fpga.duty1 = this->duty1;
-	fpga.duty2 = this->duty2;
-	if (startMode == 2)
-	{
-		fpga.discharge = true;
-	}
-	else
-	{
-		fpga.discharge = false;
-	}
-	
 	set_target_current(i_control);
 	
-	fpga.enable = scBat.IsRun();
-	
-	update_fpga_data(&fpga);
+	update_fpga_data(&bat.fpga);
 }
 
 void ThreeLevel::StateControl()
@@ -140,16 +128,16 @@ void ThreeLevel::StateControl()
 		this->On();
 		if (startMode == 1)
 		{
-			scBat.SetIOutTarget(scData->cbPara.chargeCurrW);
-			scBat.SetUOutTarget(scData->cbPara.chargeVoltW);
+			bat.SetIOutTarget(scData->cbPara.chargeCurrW);
+			bat.SetUOutTarget(scData->cbPara.chargeVoltW);
 		}
 		else if (startMode == 2)
 		{
-			scBat.SetIOutTarget(scData->cbPara.dischargeCurrW);
-			scBat.SetUOutTarget(scData->cbPara.dischargeVoltW);
+			bat.SetIOutTarget(scData->cbPara.dischargeCurrW);
+			bat.SetUOutTarget(scData->cbPara.dischargeVoltW);
 		}
 		faultKeepTime.Stop();
-		fpga.unlock = false;
+		bat.fpga.unlock = false;
 	}
 	else
 	{
@@ -159,9 +147,9 @@ void ThreeLevel::StateControl()
 			&& (sys_fault != 0)
 			&& (sys_lock == 0))
 		{
-			scBat.ResetFaulture();
+			bat.ResetFaulture();
 			faultKeepTime.Reset();
-			fpga.unlock = true;
+			//fpga.unlock = true;
 		}
 	}
 	
@@ -187,15 +175,15 @@ void ThreeLevel::On()
 {
 	if (!isStartEnable)
 	{
-		scBat.StartMode(startMode);
-		scBat.ConstPowerMode(isConstP);
+		bat.StartMode(startMode);
+		bat.ConstPowerMode(isConstP);
 		restartTime.Start();
 	}
 	
 	if (restartTime.GetResult())
 	{
 		Product::On();
-		scBat.On();
+		bat.On();
 	}
 }
 
@@ -206,30 +194,29 @@ void ThreeLevel::Off()
 		Product::Off();
 		restartTime.Reset();
 	}
-	scBat.Off();
+	bat.Off();
 }
 
 void ThreeLevel::Run()
 {
-	scBat.Run();
+	bat.Run();
 	
-	this->duty1 = scBat.GetDuty1();
-	this->duty2 = scBat.GetDuty2();
+	
 }
 
 void ThreeLevel::FastCheck()
 {
-	scBat.RefreshState();
+	bat.RefreshState();
 	
-	sys_fault = (scBat.GetFault() & faultMast);
-	sys_lock = (scBat.GetLock() & faultMast);
+	sys_fault = (bat.GetFault() & faultMast);
+	sys_lock = (bat.GetLock() & faultMast);
 }
 
 void ThreeLevel::SlowCheck()
 {
-	scBat.SlowCheck();
+	bat.SlowCheck();
 	
-	CanCheck();
+	//CanCheck();
 }
 
 void ThreeLevel::FanLogic()
@@ -314,7 +301,7 @@ void ThreeLevel::FanLogic()
 
 void ThreeLevel::RefreshRelay()
 {
-	scBat.RefreshRelay();
+	bat.RefreshRelay();
 	faultKeepTime.Refresh();
 	restartTime.Refresh();
 }

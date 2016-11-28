@@ -32,9 +32,9 @@ static STD_MSG_CON_TB _std_msg_table[CAN_STD_FRAME_NUM] =
 	{PORTx, CAN_ZX_DIRC, can.mxcx_id,    can.ctrl_id,  	CAN_FUNC_P_POLL,           24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbPara,     (uint8_t *)&shareData.cbPara,    				RT_NULL},
 	{PORTx, CAN_ZX_DIRC, can.mxcx_id,    can.ctrl_id,  	CAN_FUNC_AD_POLL,          24,     0,      0, 	 (uint8_t *)&can.CanBuf.cbAdj,      (uint8_t *)&shareData.cbAdj,    				RT_NULL},	
 	                                                                               
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_CHECK,   	    8,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_check,  (uint8_t *)&shareData.canAppBuf.iap_check,    	can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_INFO,  	 0x10,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_info,   (uint8_t *)&shareData.canAppBuf.iap_info,    	can.MsgRx_Deal},
-	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_WRITE,      0xff,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_file,   (uint8_t *)&shareData.canAppBuf.iap_file,    	can.MsgRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_CHECK,   	    8,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_check,  (uint8_t *)&shareData.canAppBuf.iap_check,    	can.IapRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_INFO,  	 0x10,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_info,   (uint8_t *)&shareData.canAppBuf.iap_info,    	can.IapRx_Deal},
+	{PORTx, CAN_RX_DIRC, can.ctrl_id,    can.mon_id,  	CAN_FUNC_IAP_WRITE,      0xff,    13,      0, 	 (uint8_t *)&can.CanBuf.iap_file,   (uint8_t *)&shareData.canAppBuf.iap_file,    	can.IapRx_Deal},
 	{PORTx, CAN_ZX_DIRC, can.mxcx_id,  	 can.ctrl_id,   CAN_FUNC_IAP,   		    8,     0,      0, 	 (uint8_t *)&can.CanBuf.iap_reply,  (uint8_t *)&shareData.canAppBuf.iap_reply,    	RT_NULL},
 };
 
